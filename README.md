@@ -1,7 +1,7 @@
 # nixtcloud
 Nextcloud with NixOS in the backend and P2P connectivity enabled
 
-This implementation is based in the works of many amazing people. I just aim to provide a way to combine many things together and automate the installation of Nextcloud... even for users that do not know anything about Linux or NixOS. This system is built in a way to provide:
+This implementation is based on the works of many amazing people. I just aim to provide a way to combine many things together and automate the installation of Nextcloud... even for users that do not know anything about Linux or NixOS. This system is built in a way to provide:
 
 - Easy automated install of Nextcloud (no special linux/NixOS knowledge required)
 - Minimal periodic maintenance
