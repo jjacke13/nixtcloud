@@ -15,4 +15,4 @@ If I have seen further than others, it is by standing upon the shoulders of gian
 
 Privacy for everyone!
 
-P.S Very analytic instructions will be included very soon
+P.S Very analytic instructions will be included very soon. Default username & pass: "admin"
