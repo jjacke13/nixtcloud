@@ -20,6 +20,5 @@ pkgs.buildNpmPackage rec {
     description = "Holesail!";
     homepage = "holesail.io";
     license = pkgs.lib.licenses.gpl3Only;
-    maintainers = with pkgs.lib.maintainers; [ pkgs.lib.maintainers.jacke ];
   };
 }
