@@ -16,3 +16,6 @@ If I have seen further than others, it is by standing upon the shoulders of gian
 Privacy for everyone!
 
 P.S Very analytic instructions will be included very soon. Default username & pass: "admin"
+
+
+*** This project is new and subject to changes without notification :P ***
