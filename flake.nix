@@ -1,7 +1,7 @@
 {
   description = "Base system for raspberry pi 4";
   inputs = {
-    nixpkgs.url = "path:./nixpkgs-nixos-unstable";
+    nixpkgs.url = "https://github.com/jjacke13/nixtcloud/releases/download/beta.2/nixos-nixtcloud.tar.gz";
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
