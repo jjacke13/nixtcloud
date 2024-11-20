@@ -42,6 +42,8 @@ Once your are connected to your Nextcloud instance, you will find some files alr
    are: "test" . There was no reason to put complex password here because it is a public folder after all...
 
 If you accidentally delete remote.txt file or public.txt file, don't worry. Just delete the rebooter.txt file and upon reboot the system will create new connection strings.
+
+If you connect a usb device on your Pi, wait 30 sec and then it will be available as Nextcloud external storage ;) You can connect multiple usb devices with an externally powered usb hub or a Pi usb hub hat. Just be carefull for the temperature...
   
 
 
