@@ -15,7 +15,28 @@ If I have seen further than others, it is by standing upon the shoulders of gian
 
 Privacy for everyone!
 
-P.S Very analytic instructions will be included very soon. Default username & pass: "admin"
+Build Instructions:
+
+1. If your are runnning Nixos, just execute:
+     $ nix build --system aarch64-linux github:jjacke13/nixtcloud#packages.aarch64-linux.sdcard
+   Then decompress the resulting .zst image, burn it to an sd card, put the card in your Rpi 4, and enjoy! Assuming your Pi is connected to your home router with ethernet, you can visit " nixtcloud.local " inside your home network. Default 
+   username and pass are: "admin" . Please change the password after your first connection.
+
+2. If you are in other Linux or MacOS, you have to install the Nix package manager first.
+     $ sh <(curl -L https://nixos.org/nix/install) --no-daemon
+   Then run:
+     $ nix build --extra-experimental-features nix-command --extra-experimental-features flakes --system aarch64-linux github:jjacke13/nixtcloud#packages.aarch64-linux.sdcard
+   Then follow the rest steps of 1 above.
+
+Once your are connected to your Nextcloud instance, you will find some files already there.
+
+1. If you delete rebooter.txt , after some seconds the Pi will reboot.
+2. The qr code in remote.jpg is the equivalent of remote.txt. You can use it to connect remotely to your Nextcloud using Holesail! You can find instructions for Holesail at holesail.io
+3. In the Public folder you will find another string with its qr code. Whatever you put in public folder, you can share it with others just by giving them the string in "public.txt" for use in their Holesail. If they connect, the username and pass 
+   are: "test" . There was no reason to put complex password here because it is a public folder after all...
+
+If you accidentally delete remote.txt file or public.txt file, don't worry. Just delete the rebooter.txt file and upon reboot the system will create new connection strings.
+  
 
 
 *** This project is new and subject to changes without notification :P ***
