@@ -38,14 +38,14 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1,
+        "lastModified": 1731676054,
         "narHash": "sha256-LhaIou2VARB5Mqpoi0qbrgPEXMoebwR1DiplwajwwGg=",
-        "path": "./nixpkgs-nixos-unstable",
-        "type": "path"
+        "type": "tarball",
+        "url": "https://github.com/jjacke13/nixtcloud/releases/download/beta.2/nixos-nixtcloud.tar.gz"
       },
       "original": {
-        "path": "./nixpkgs-nixos-unstable",
-        "type": "path"
+        "type": "tarball",
+        "url": "https://github.com/jjacke13/nixtcloud/releases/download/beta.2/nixos-nixtcloud.tar.gz"
       }
     },
     "root": {
