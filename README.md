@@ -31,6 +31,7 @@ Build Instructions:
     Then run:
    
      $ nix build --extra-experimental-features nix-command --extra-experimental-features flakes --system aarch64-linux github:jjacke13/nixtcloud#packages.aarch64-linux.sdcard
+   
    Then follow the rest steps of 1 above.
 
 Once your are connected to your Nextcloud instance, you will find some files already there.
