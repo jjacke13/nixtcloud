@@ -5,7 +5,7 @@ This implementation is based on the works of many amazing people. I just aim to 
 
 - Easy automated install of Nextcloud (no special linux/NixOS knowledge required)
 - Minimal periodic maintenance
-- Automated mounting of usb devices as nextcloud external storage (Currently FAT and ext4 formats supported, exfat and ntfs coming soon)
+- Automated mounting of usb devices as nextcloud external storage (Currently FAT, ext4 and exfat formats supported. Probably others in the future).
 - very easy remote access to your Nextcloud, using the Holesail app in Android/iOS, Linux, Windows or MacOS just by scanning a qr code or copying a string.
 - Privacy for everyone 
 
