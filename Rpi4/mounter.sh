@@ -34,7 +34,6 @@ for device in $(lsblk -rpno NAME,TYPE | grep 'disk' | awk '{print $1}'); do
                     fi
                     # Create a subdirectory for the mount
                     device_mount_dir="$MOUNT_DIR/$device_label"
-                    #device_mount_dir="$MOUNT_DIR/$(basename "$device")"
                     mkdir -p "$device_mount_dir"
                     # Decide the mount options based on the filesystem type
                     if [ "$fs_type" = "vfat" ]; then
@@ -44,7 +43,10 @@ for device in $(lsblk -rpno NAME,TYPE | grep 'disk' | awk '{print $1}'); do
                         # Mount for ext4 filesystem
                         mount -o rw "$device" "$device_mount_dir"
                         chown -R nextcloud:nextcloud "$device_mount_dir"
-		    else
+		            elif [ "$fs_type" = "exfat" ]; then
+                        # Mount for exfat filesystem
+                        mount -t exfat -o rw,uid=$uid,gid=$gid "$device" "$device_mount_dir"
+                    else
                         echo "Unsupported filesystem type: $fs_type for $device"
                         continue
                     fi
@@ -82,6 +84,9 @@ for device in $(lsblk -rpno NAME,TYPE | grep 'disk' | awk '{print $1}'); do
                         # Mount for ext4 filesystem
                         mount -o rw "$partition" "$device_mount_dir"
 			            chown -R nextcloud:nextcloud "$device_mount_dir"
+                    elif [ "$fs_type" = "exfat" ]; then
+                        # Mount for exfat filesystem
+                        mount -t exfat -o rw,uid=$uid,gid=$gid "$partition" "$device_mount_dir"
                     else
                         echo "Unsupported filesystem type: $fs_type for $partition"
                         continue
@@ -120,7 +125,7 @@ for mount_point in "$CHECK_DIR"/*; do
         if ! lsblk -o MOUNTPOINT | grep -q "$mount_point"; then
             folder_name="/${mount_point##*/}"
 	        echo "Mount point without device: $folder_name"
-            i=$(/run/current-system/sw/bin/nextcloud-occ files_external:list | grep "$folder_name" | /run/current-system/sw/bin/awk '{print $2}')
+            i=$(/run/current-system/sw/bin/nextcloud-occ files_external:list | grep "$folder_name" | awk '{print $2}')
             echo "$i"
             if [ -n "$i" ]; then 
                 /run/current-system/sw/bin/nextcloud-occ files_external:delete -y $i
