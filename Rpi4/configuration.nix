@@ -131,7 +131,7 @@
   ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.###### 
   systemd.services.mymnt = {
     enable = true;
-    path = [ pkgs.util-linux pkgs.gawk ];
+    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs ];
     serviceConfig = {
 		  Type = "simple";
 		  ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/mounter.sh";
