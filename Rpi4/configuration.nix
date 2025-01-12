@@ -18,8 +18,6 @@
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   #networking.wireless.networks = { my_network = { psk = "my_pass"; }; }; ###You can define your wireless network here if you don't want to use ethernet cable.
   
-  networking.networkmanager.enable = true;  
-
   # Set your time zone.
   time.timeZone = "auto";
   
