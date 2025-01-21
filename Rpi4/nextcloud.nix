@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
-
+let
+    name = "nixtcloud";
+in
 {
   #### Defining the admin password file. This file is used to set the admin password for the nextcloud instance. ####
   environment.etc."nixos/adminpass.txt" = { 
@@ -11,12 +13,12 @@
   services.nextcloud = {
         package = pkgs.nextcloud30;
         enable = true;
-        hostName = "nixtcloud";
+        hostName = name;
         database.createLocally = true;
         config.dbtype = "pgsql";
         config.adminuser = "admin";
         config.adminpassFile = "/etc/nixos/adminpass.txt";
-        settings.trusted_domains = [ "nixtcloud.local"];
+        settings.trusted_domains = [ "${name}.local" ];
         settings.default_phone_region = "GR"; ### you can change this to your country code
         settings.log_type = "file";
 	settings.loglevel = 4;
