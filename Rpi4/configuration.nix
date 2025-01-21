@@ -1,6 +1,8 @@
-
-{ config, lib, pkgs, ... }:
-
+{ config, lib, pkgs, inputs, ... }:
+let
+  holesail = inputs.holesail.packages.aarch64-linux.holesail;
+  name = "nixtcloud";
+in
 {
   imports =
     [ ./hardware-configuration.nix
@@ -11,13 +13,11 @@
   boot.loader.grub.enable = false;
   # Enables the generation of /boot/extlinux/extlinux.conf
   boot.loader.generic-extlinux-compatible.enable = true;
-  networking.hostName = "nixtcloud"; 
-  
-  # Pick only one of the below networking options.
+  networking.hostName = name; 
   
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  #networking.wireless.networks = { my_network = { psk = "my_pass"; }; }; ###You can define your wireless network here if you don't want to use ethernet cable.
-  
+  #networking.wireless.networks = { your_SSID = { psk = "your_PASS"; }; };   ##### You can define your wireless network here if you don't want to use ethernet cable.  
+
   # Set your time zone.
   time.timeZone = "auto";
   
@@ -25,6 +25,7 @@
   nix.settings = {
 	  experimental-features = "nix-command flakes";
 	  auto-optimise-store = true;
+    require-sigs = false;
   };
   nix.gc = {
 	  automatic = true;
@@ -38,9 +39,6 @@
      isNormalUser = true;
      extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
      initialPassword = "admin";
-     packages = with pkgs; [
-        htop
-     ];
    };
   
   ### If you know what the following line does, you can uncomment it ;)
@@ -48,11 +46,12 @@
 
   ###### Packages that are available systemwide. Most probably you don't need to change this. ######
   environment.systemPackages = [
+      pkgs.htop
       pkgs.wget
       pkgs.avahi
       pkgs.nssmdns  
       pkgs.cron
-      pkgs.holesail # This is to install Holesail!!
+      holesail # This is to install Holesail!!
   ];  
 
   ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
@@ -62,7 +61,7 @@
   
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  #users.users.admin.openssh.authorizedKeys.keys = [ "place your SSH key here and then uncomment the line"];
+  users.users.admin.openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCjqJudIladr0clAOCeyK4W2+hESdm1kCp9xKp2ssc3mKdagLPjW1Ve5aSnsylVhE5boi+EMDKMvvmw3Ac/qpqd60pBchBR0Ex5NZiOg8BVp99aBOOfJD2KVdVpPkAM9wPAZU46EFMLd5QGJ0y88y72SF22Mo3tBYk516GuLoXgzNNSQT51DUSMey2Sa5euizBNnHwZntlkPNeuH4/TcFhR9PDZ4KxKMfu1y7rUhbHd0XJGRNNlPGFtiYZOssvdOvZqm+BHbUzSxvfALn5QA1ZgUglpEcEIrWD4H5NDjjoE0Z1VQ1pyYF4frV2e8l3sJr1Hl4xT6Y2bPyJsBDUmOtTma0r9lUzoMxblqW5wGnn+rPFlNJEwK21BgJ/SidWGkLA2AxsweWq6Gw/S1RAzkT+oud5t69TTelZQNMbiN0L69HkoZSIcjTQX7Wp3Y9cWa+rvJIgkDPlhhg8AruG+kwSIxVDwrwhRjSCg9v5/IxPU5fiyEwCRfdi69WDkcN6PjOT+9Lkufidta81TMN5PCsSWUjaVENk6ZEjzD8CpQ072ELpyCIj21zp3TDA/oSckJUSO53d8dZhYCsBzlw/duNy+3n06eBvy7keN7MMqQPqhIFQZHFEh9ymy8B7qnJ07W0Iha82npXnwtc2ZyQNy16MPE0TmUF2/03/l89t2BNcTQQ=="];
 
   # Probably we don't need the firewall. In the future this might be changed.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -73,11 +72,16 @@
   #### DON'T CHANGE ANYTHING BELOW THIS LINE UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING ###
 
   ########## AVAHI ########## 
-  services.avahi.enable = true;
-  services.avahi.publish.enable = true;
-  services.avahi.hostName = "nixtcloud";
-  services.avahi.nssmdns4 = true; 
-  services.avahi.publish.userServices = true;
+  services.avahi = {
+    enable = true;
+    hostName = name;
+    nssmdns4 = true; 
+    reflector = true;
+    publish.userServices = true;
+    publish.enable = true;
+    publish.domain = true;
+    publish.addresses = true;
+  };
   ###########################
 
   ###### System services ######
@@ -129,7 +133,7 @@
   ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.###### 
   systemd.services.mymnt = {
     enable = true;
-    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs ];
+    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs];
     serviceConfig = {
 		  Type = "simple";
 		  ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/mounter.sh";
@@ -143,7 +147,7 @@
   systemd.services.p2pmagic = {
     description = "MAGIC";
     enable = true;
-    path = [ pkgs.holesail pkgs.util-linux ];
+    path = [ holesail pkgs.util-linux ];
     script = ''
        holesail --live 80 --connector $(cat /var/lib/nextcloud/data/admin/files/remote.txt)
     '';
@@ -157,7 +161,7 @@
   systemd.services.p2public = {
     description = "public";
     enable = true;
-    path = [ pkgs.holesail pkgs.util-linux ];
+    path = [ holesail pkgs.util-linux ];
     script = ''
        holesail --filemanager "/mnt/Public" --connector $(cat /mnt/Public/public.txt) --username "test" --password "test" --port 7979
     '';
@@ -194,5 +198,3 @@
   ##############################################################################################################
 
 }
-
-
