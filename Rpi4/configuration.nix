@@ -25,7 +25,6 @@ in
   nix.settings = {
 	  experimental-features = "nix-command flakes";
 	  auto-optimise-store = true;
-    require-sigs = false;
   };
   nix.gc = {
 	  automatic = true;
