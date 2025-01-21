@@ -115,7 +115,7 @@ done
 ########## Now the ummounter part #################
 
 # Specify the directory to check
-CHECK_DIR="/mnt/usb"  # Change this to your specific directory
+CHECK_DIR="/mnt/usb"
 
 # Loop through each directory in the specified directory
 for mount_point in "$CHECK_DIR"/*; do
