@@ -19,18 +19,18 @@ Build Instructions:
 
 1. If your are runnning Nixos, just execute:
 
-		$ nix build --system aarch64-linux github:jjacke13/nixtcloud#packages.aarch64-linux.Rpi4
+		nix build --system aarch64-linux github:jjacke13/nixtcloud#packages.aarch64-linux.Rpi4
    
    Then decompress the resulting .zst image, burn it to an sd card, put the card in your Rpi 4, and enjoy! Assuming your Pi is connected to your home router with ethernet, you can visit " nixtcloud.local " inside your home network. Default 
    username and pass are: "admin" . Please change the password after your first connection.
 
 3. If you are in other Linux or MacOS, you have to install the Nix package manager first.
    
-		$ sh <(curl -L https://nixos.org/nix/install) --no-daemon
+		sh <(curl -L https://nixos.org/nix/install) --no-daemon
 
     Then run:
 
-		$ nix build --extra-experimental-features nix-command --extra-experimental-features flakes --system aarch64-linux github:jjacke13/nixtcloud#packages.aarch64-linux.Rpi4
+		nix build --extra-experimental-features nix-command --extra-experimental-features flakes --system aarch64-linux github:jjacke13/nixtcloud#packages.aarch64-linux.Rpi4
    
    Then follow the rest steps of 1 above.
 
