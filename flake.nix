@@ -9,7 +9,7 @@
     holesail.url = "github:jjacke13/holesail-nix";
   };
 
-  outputs = { self, nixpkgs, nixos-generators, ... }@inputs:
+  outputs = { self, nixpkgs, nixos-generators, holesail, ... }@inputs:
   {
     packages.aarch64-linux = {
       Rpi4 = nixos-generators.nixosGenerate {
@@ -17,6 +17,7 @@
         format = "sd-aarch64";
         specialArgs = { inherit inputs;};
         modules = [
+          holesail.nixosModules.aarch64-linux.holesail
           ./Rpi4/configuration.nix 
           {system.stateVersion = "24.11";}
         ];
@@ -25,11 +26,10 @@
     nixosConfigurations.nixtcloud = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs;};
       modules = [
+        holesail.nixosModules.aarch64-linux.holesail
         ./Rpi4/configuration.nix 
         {system.stateVersion = "24.11";}
       ];      
     };
   };
 }
-
-
