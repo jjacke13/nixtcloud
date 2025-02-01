@@ -15,9 +15,9 @@ in
   networking.hostName = name; 
   
   #### You can define your wireless network here if you don't want to use ethernet cable.
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.wireless.networks = { jacke = { psk = "2018ypsgos"; };
-  };   
+  #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  #networking.wireless.networks = { SSID = { psk = "your_pass"; };
+  #};   
 
   # Set your time zone.
   time.timeZone = "auto";
