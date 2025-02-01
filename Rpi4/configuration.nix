@@ -62,7 +62,7 @@ in
   ########## SSH & Security ##########
   services.openssh.enable = true;
   services.openssh.settings.PermitRootLogin = "no";
-  users.users.admin.openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCjqJudIladr0clAOCeyK4W2+hESdm1kCp9xKp2ssc3mKdagLPjW1Ve5aSnsylVhE5boi+EMDKMvvmw3Ac/qpqd60pBchBR0Ex5NZiOg8BVp99aBOOfJD2KVdVpPkAM9wPAZU46EFMLd5QGJ0y88y72SF22Mo3tBYk516GuLoXgzNNSQT51DUSMey2Sa5euizBNnHwZntlkPNeuH4/TcFhR9PDZ4KxKMfu1y7rUhbHd0XJGRNNlPGFtiYZOssvdOvZqm+BHbUzSxvfALn5QA1ZgUglpEcEIrWD4H5NDjjoE0Z1VQ1pyYF4frV2e8l3sJr1Hl4xT6Y2bPyJsBDUmOtTma0r9lUzoMxblqW5wGnn+rPFlNJEwK21BgJ/SidWGkLA2AxsweWq6Gw/S1RAzkT+oud5t69TTelZQNMbiN0L69HkoZSIcjTQX7Wp3Y9cWa+rvJIgkDPlhhg8AruG+kwSIxVDwrwhRjSCg9v5/IxPU5fiyEwCRfdi69WDkcN6PjOT+9Lkufidta81TMN5PCsSWUjaVENk6ZEjzD8CpQ072ELpyCIj21zp3TDA/oSckJUSO53d8dZhYCsBzlw/duNy+3n06eBvy7keN7MMqQPqhIFQZHFEh9ymy8B7qnJ07W0Iha82npXnwtc2ZyQNy16MPE0TmUF2/03/l89t2BNcTQQ=="];
+  #users.users.admin.openssh.authorizedKeys.keys = [ "your_key_here"]; ## if your want, you can use your ssh keys to ssh
   networking.firewall.allowedTCPPorts = [ 22 80 ];
   networking.firewall.enable = true;
   #####################################
