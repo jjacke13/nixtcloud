@@ -1,6 +1,5 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 let
-  holesail = inputs.holesail.packages.aarch64-linux.holesail;
   name = "nixtcloud";
 in
 {
@@ -15,8 +14,10 @@ in
   boot.loader.generic-extlinux-compatible.enable = true;
   networking.hostName = name; 
   
-  #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  #networking.wireless.networks = { your_SSID = { psk = "your_PASS"; }; };   ##### You can define your wireless network here if you don't want to use ethernet cable.  
+  #### You can define your wireless network here if you don't want to use ethernet cable.
+  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.wireless.networks = { jacke = { psk = "2018ypsgos"; };
+  };   
 
   # Set your time zone.
   time.timeZone = "auto";
@@ -25,6 +26,7 @@ in
   nix.settings = {
 	  experimental-features = "nix-command flakes";
 	  auto-optimise-store = true;
+    require-sigs = false;
   };
   nix.gc = {
 	  automatic = true;
@@ -50,7 +52,6 @@ in
       pkgs.avahi
       pkgs.nssmdns  
       pkgs.cron
-      holesail # This is to install Holesail!!
   ];  
 
   ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
@@ -58,16 +59,14 @@ in
   services.cron.enable = true;
   services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"];
   
-  # Enable the OpenSSH daemon.
+  ########## SSH & Security ##########
   services.openssh.enable = true;
+  services.openssh.settings.PermitRootLogin = "no";
   users.users.admin.openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCjqJudIladr0clAOCeyK4W2+hESdm1kCp9xKp2ssc3mKdagLPjW1Ve5aSnsylVhE5boi+EMDKMvvmw3Ac/qpqd60pBchBR0Ex5NZiOg8BVp99aBOOfJD2KVdVpPkAM9wPAZU46EFMLd5QGJ0y88y72SF22Mo3tBYk516GuLoXgzNNSQT51DUSMey2Sa5euizBNnHwZntlkPNeuH4/TcFhR9PDZ4KxKMfu1y7rUhbHd0XJGRNNlPGFtiYZOssvdOvZqm+BHbUzSxvfALn5QA1ZgUglpEcEIrWD4H5NDjjoE0Z1VQ1pyYF4frV2e8l3sJr1Hl4xT6Y2bPyJsBDUmOtTma0r9lUzoMxblqW5wGnn+rPFlNJEwK21BgJ/SidWGkLA2AxsweWq6Gw/S1RAzkT+oud5t69TTelZQNMbiN0L69HkoZSIcjTQX7Wp3Y9cWa+rvJIgkDPlhhg8AruG+kwSIxVDwrwhRjSCg9v5/IxPU5fiyEwCRfdi69WDkcN6PjOT+9Lkufidta81TMN5PCsSWUjaVENk6ZEjzD8CpQ072ELpyCIj21zp3TDA/oSckJUSO53d8dZhYCsBzlw/duNy+3n06eBvy7keN7MMqQPqhIFQZHFEh9ymy8B7qnJ07W0Iha82npXnwtc2ZyQNy16MPE0TmUF2/03/l89t2BNcTQQ=="];
-
-  # Probably we don't need the firewall. In the future this might be changed.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  networking.firewall.enable = false;
-
+  networking.firewall.allowedTCPPorts = [ 22 80 ];
+  networking.firewall.enable = true;
+  #####################################
+  
   #### DON'T CHANGE ANYTHING BELOW THIS LINE UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING ###
 
   ########## AVAHI ########## 
@@ -76,6 +75,7 @@ in
     hostName = name;
     nssmdns4 = true; 
     reflector = true;
+    openFirewall = true;
     publish.userServices = true;
     publish.enable = true;
     publish.domain = true;
@@ -110,7 +110,7 @@ in
           if [ ! -f /var/lib/nextcloud/data/admin/files/remote.txt ]; then
               touch /var/lib/nextcloud/data/admin/files/remote.txt
               pwgen -1 -N 1 -s 35 | tr -d '\n' > /var/lib/nextcloud/data/admin/files/remote.txt
-              qrencode -o /var/lib/nextcloud/data/admin/files/remote.jpg -r /var/lib/nextcloud/data/admin/files/remote.txt
+              qrencode -o /var/lib/nextcloud/data/admin/files/remote.jpg -r /var/lib/nextcloud/data/admin/files/remote.txt -s 10
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/remote.txt
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/remote.jpg
               /run/current-system/sw/bin/nextcloud-occ files:scan --path=/admin/files
@@ -118,7 +118,7 @@ in
           if [ ! -f /mnt/Public/public.txt ]; then
               touch /mnt/Public/public.txt
               pwgen -1 -N 1 -s 35 | tr -d '\n' > /mnt/Public/public.txt
-              qrencode -o /mnt/Public/public.jpg -r /mnt/Public/public.txt
+              qrencode -o /mnt/Public/public.jpg -r /mnt/Public/public.txt -s 10
               chown -R nextcloud:nextcloud /mnt/Public
           fi
           /run/current-system/sw/bin/nextcloud-occ files_external:create "/Public" local null::null -c datadir="/mnt/Public"
@@ -143,31 +143,21 @@ in
   ################################################################################
   
   #### The following sevice enables Holesail to do its magic ####
-  systemd.services.p2pmagic = {
-    description = "MAGIC";
-    enable = true;
-    path = [ holesail pkgs.util-linux ];
-    script = ''
-       holesail --live 80 --connector $(cat /var/lib/nextcloud/data/admin/files/remote.txt)
-    '';
-    serviceConfig.Type = "simple";
-    serviceConfig.Restart = "always";
-    serviceConfig.RestartSec = "30";
+  services.holesail-server.p2pmagic = {
+  	enable = true;
+  	port = 80;
+  	connector-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
   };
   ###############################################################################
   
   ### The following service enables the share of the Public folder with Holesail ####
-  systemd.services.p2public = {
-    description = "public";
-    enable = true;
-    path = [ holesail pkgs.util-linux ];
-    script = ''
-       holesail --filemanager "/mnt/Public" --connector $(cat /mnt/Public/public.txt) --username "test" --password "test" --port 7979
-    '';
-    serviceConfig.Type = "simple";
-    serviceConfig.Restart = "always";
-    serviceConfig.RestartSec = "30";
-    after = ["startup.service"];
+  services.holesail-filemanager.p2public = {
+  	enable = true;
+  	connector-file = "/mnt/Public/public.txt";
+    path = "/mnt/Public";
+    username = "test";
+    password = "test";
+    role = "user";
   };
   ##############################################################################
   
@@ -197,3 +187,5 @@ in
   ##############################################################################################################
 
 }
+
+
