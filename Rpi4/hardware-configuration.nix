@@ -1,6 +1,6 @@
 # DO NOT modify this file!!
 
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   hardware.enableRedistributableFirmware = lib.mkDefault true;
