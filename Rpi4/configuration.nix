@@ -8,16 +8,11 @@ in
       ./nextcloud.nix
     ];
 
-  # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
-  boot.loader.grub.enable = false;
-  # Enables the generation of /boot/extlinux/extlinux.conf
-  boot.loader.generic-extlinux-compatible.enable = true;
   networking.hostName = name; 
   
   #### You can define your wireless network here if you don't want to use ethernet cable.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  #networking.wireless.networks = { SSID = { psk = "your_pass"; };
-  #};   
+  #networking.wireless.networks = { jacke = { psk = "2018ypsgos"; };  };   
 
   # Set your time zone.
   time.timeZone = "auto";
@@ -62,9 +57,11 @@ in
   ########## SSH & Security ##########
   services.openssh.enable = true;
   services.openssh.settings.PermitRootLogin = "no";
-  #users.users.admin.openssh.authorizedKeys.keys = [ "your_key_here"]; ## if your want, you can use your ssh keys to ssh
-  networking.firewall.allowedTCPPorts = [ 22 80 ];
-  networking.firewall.enable = true;
+  #users.users.admin.openssh.authorizedKeys.keys = [ "your key here"];
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 22 80 ];
+  };  
   #####################################
   
   #### DON'T CHANGE ANYTHING BELOW THIS LINE UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING ###
@@ -76,8 +73,8 @@ in
     nssmdns4 = true; 
     reflector = true;
     openFirewall = true;
-    publish.userServices = true;
     publish.enable = true;
+    publish.userServices = true;
     publish.domain = true;
     publish.addresses = true;
   };
@@ -150,7 +147,7 @@ in
   };
   ###############################################################################
   
-  ### The following service enables the share of the Public folder with Holesail ####
+  ### The following service enables the share of the Public folder with Holesail ###
   services.holesail-filemanager.p2public = {
   	enable = true;
   	connector-file = "/mnt/Public/public.txt";

@@ -11,27 +11,31 @@ in
   };
 
   services.nextcloud = {
-        package = pkgs.nextcloud30;
         enable = true;
+        package = pkgs.nextcloud30;
         hostName = name;
         database.createLocally = true;
-        config.dbtype = "pgsql";
-        config.adminuser = "admin";
-        config.adminpassFile = "/etc/nixos/adminpass.txt";
-        settings.trusted_domains = [ "${name}.local" ];
-        settings.default_phone_region = "GR"; ### you can change this to your country code
-        settings.log_type = "file";
-	settings.loglevel = 4;
-	maxUploadSize = "5000M";
+        config = {
+                dbtype = "pgsql";
+                adminuser = "admin";
+                adminpassFile = "/etc/nixos/adminpass.txt";
+        };
+        settings = {
+                trusted_domains = [ "${name}.local" ];
+                default_phone_region = "GR"; ### you can change this to your country code
+                log_type = "file";
+	        loglevel = 4;
+	        nginx.recommendedHttpHeaders =  true;
+	        nginx.hstsMaxAge = 15553000000;
+	        maintenance_window_start = 1;
+        };
+        maxUploadSize = "5000M";
         appstoreEnable = true;
         extraAppsEnable = true;
         configureRedis = true;
         caching.apcu = true;
         caching.redis = true;
         caching.memcached = true;
-        settings.nginx.recommendedHttpHeaders =  true;
-	settings.nginx.hstsMaxAge = 15553000000;
-	settings = { maintenance_window_start = 1;};
         phpOptions = {  		
                 "opcache.fast_shutdown" = "1";
   		"opcache.interned_strings_buffer" = "10";

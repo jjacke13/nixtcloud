@@ -3,8 +3,6 @@ uid=$(id -u nextcloud)
 gid=$(id -g nextcloud)
 # Define the directory where you want to mount USB devices
     MOUNT_DIR="/mnt/usb"
-    # Define the permissions you want to set
-    MOUNT_PERMISSIONS="755"
     # Define the user who should own the mounted directories
     MOUNT_USER="nextcloud"
 
