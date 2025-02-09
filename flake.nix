@@ -3,7 +3,13 @@
   
   #Nix-community cachix is needed if you want to build the image for raspberry pi 5. If you don't want to use it, 
   #the linux kernel will be built from source which takes a long time.
-    
+  nixConfig = {
+      substituters = [ "https://nix-community.cachix.org"
+                       "https://cache.nixos.org" ];
+	    trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" 
+                              "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
+  };
+  
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-generators = {
@@ -11,11 +17,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     holesail.url = "github:jjacke13/holesail-nix";
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
   };
 
-  outputs = { self, nixpkgs, nixos-generators, holesail, nixos-hardware, raspberry-pi-nix, ... }:
+  outputs = { self, nixpkgs, nixos-generators, holesail, raspberry-pi-nix, ... }:
   {
     nixosModules.state = { system.stateVersion = "24.11"; };
 
@@ -24,7 +29,6 @@
         system = "aarch64-linux";
         format = "sd-aarch64";
         modules = [
-          nixos-hardware.nixosModules.raspberry-pi-4
           ./Rpi4/configuration.nix
           holesail.nixosModules.aarch64-linux.holesail
           self.nixosModules.state
@@ -36,7 +40,6 @@
     
     nixosConfigurations.Rpi4 = nixpkgs.lib.nixosSystem {
       modules = [
-        nixos-hardware.nixosModules.raspberry-pi-4
         holesail.nixosModules.aarch64-linux.holesail
         ./Rpi4/configuration.nix 
         self.nixosModules.state
