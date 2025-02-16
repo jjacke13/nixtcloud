@@ -52,7 +52,8 @@ in
   ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
-  services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"];
+  services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"
+                                  "0 3 * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"];
   
   ########## SSH & Security ##########
   services.openssh.enable = true;
@@ -179,6 +180,17 @@ in
   environment.etc."nixos/mounter.sh" = { 
     source = ./mounter.sh;
     mode = "0774";
+    group = "wheel";
+  };
+
+  environment.etc."nixos/updater.sh" = { 
+    source = ./updater.sh;
+    mode = "0774";
+    group = "wheel";
+  };
+  environment.etc."nixos/device.txt" = { 
+    text = ''Rpi4'';
+    mode = "0644";
     group = "wheel";
   };
   ##############################################################################################################
