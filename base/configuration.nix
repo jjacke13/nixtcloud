@@ -4,8 +4,7 @@ let
 in
 {
   imports =
-    [ ./hardware-configuration.nix
-      ./nextcloud.nix
+    [ ./nextcloud.nix
     ];
 
   networking.hostName = name; 
