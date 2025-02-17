@@ -23,4 +23,10 @@
 
   networking.useDHCP = lib.mkDefault true;
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
+
+  environment.etc."nixos/device.txt" = { 
+    text = ''Rpi4'';
+    mode = "0644";
+    group = "wheel";
+  };
 }
