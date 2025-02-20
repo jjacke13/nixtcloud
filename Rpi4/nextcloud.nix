@@ -32,10 +32,10 @@ in
         maxUploadSize = "5000M";
         appstoreEnable = true;
         extraAppsEnable = true;
-        configureRedis = true;
+        configureRedis = false;
         caching.apcu = true;
-        caching.redis = true;
-        caching.memcached = true;
+        caching.redis = false;
+        caching.memcached = false;
         phpOptions = {  		
                 "opcache.fast_shutdown" = "1";
   		"opcache.interned_strings_buffer" = "10";
