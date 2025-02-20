@@ -4,8 +4,7 @@
   #Nix-community cachix is needed if you want to build the image for raspberry pi 5. If you don't want to use it, 
   #the linux kernel will be built from source which takes a long time.
   nixConfig = {
-      substituters = [ "https://nix-community.cachix.org"
-                       "https://cache.nixos.org" ];
+      substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org" ];
 	    trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" 
                               "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
   };
@@ -30,7 +29,7 @@
         format = "sd-aarch64";
         modules = [
           ./base/configuration.nix
-          ./Rpi4/hardware.nix
+          ./hardware/Rpi4.nix
           holesail.nixosModules.aarch64-linux.holesail
           self.nixosModules.state
         ];
@@ -43,7 +42,7 @@
       modules = [
         holesail.nixosModules.aarch64-linux.holesail
         ./base/configuration.nix
-        ./Rpi4/hardware.nix 
+        ./hardware/Rpi4.nix 
         self.nixosModules.state
       ];      
     };
@@ -55,7 +54,7 @@
         raspberry-pi-nix.nixosModules.sd-image
         holesail.nixosModules.aarch64-linux.holesail
         ./base/configuration.nix
-        ./Rpi5/hardware.nix 
+        ./hardware/Rpi5.nix 
         self.nixosModules.state
       ];      
     };
