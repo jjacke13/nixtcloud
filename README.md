@@ -49,4 +49,4 @@ If you connect a usb device on your Pi, wait 30 sec and then it will be availabl
 
 *** This project is new and subject to changes without notification :P ***
 
-*** The test branch is exactly was its name states. After testing, changes will be merged into main branch ***
+*** The test branch is exactly what its name states. After testing, changes will be merged into main branch ***
