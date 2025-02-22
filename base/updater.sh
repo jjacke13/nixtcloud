@@ -3,7 +3,7 @@
 REPO_URL="https://github.com/jjacke13/nixtcloud.git"
 REPO_DIR="/home/admin/nixtcloud"
 BRANCH="test"
-DEVICE=$(cat /etc/nixos/device.txt)
+DEVICE="$(cat /etc/nixos/device.txt)"
 
 # Check if the repo exists
 if [ -d "$REPO_DIR/.git" ]; then
