@@ -1,19 +1,33 @@
 #!/bin/bash
-URL="https://raw.githubusercontent.com/jjacke13/nixtcloud/refs/heads/main/flake.lock"
-LOCAL_FILE="/etc/nixos/flake.lock"
-DEVICE="$(cat /etc/nixos/device)"
-# Get the hash of the local file
-LOCAL_HASH=$(sha256sum "$LOCAL_FILE" | awk '{print $1}')
 
-# Get the hash of the online file
-ONLINE_HASH=$(curl -sL "$URL" | sha256sum | awk '{print $1}')
+REPO_URL="https://github.com/jjacke13/nixtcloud.git"
+REPO_DIR="/home/admin/nixtcloud"
+BRANCH="test"
+DEVICE=$(cat /etc/nixos/device.txt)
 
-# Compare the hashes
-if [ "$LOCAL_HASH" == "$ONLINE_HASH" ]; then
-    echo "The files are identical."
-    echo "not updating"
-    exit 0
+# Check if the repo exists
+if [ -d "$REPO_DIR/.git" ]; then
+  echo "Repository exists. Checking for updates..."
+  cd "$REPO_DIR" || exit 1
+
+  # Fetch remote changes
+  git fetch origin "$BRANCH"
+
+  # Check if there are changes
+  if ! git diff --quiet HEAD origin/"$BRANCH"; then
+    echo "Changes detected, pulling latest version..."
+    git pull origin "$BRANCH"
+    
+    # Run the command only if there were changes
+    echo "Updating..."
+    nixos-rebuild switch --flake .#"$DEVICE"
+    
+  else
+    echo "No changes detected."
+  fi
 else
-    echo "updating"
-    nixos-rebuild switch --flake github:jjacke13/nixtcloud#"$DEVICE"
+  echo "Repository not found. Cloning..."
+  git clone --branch "$BRANCH" --single-branch "$REPO_URL" "$REPO_DIR"
+  cd "$REPO_DIR" || exit 1
+
 fi
