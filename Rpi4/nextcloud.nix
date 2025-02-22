@@ -34,14 +34,14 @@ in
         extraAppsEnable = true;
         configureRedis = false;
         caching.apcu = true;
-        caching.redis = false;
+        caching.redis = true;
         caching.memcached = false;
         phpOptions = {  		
-                #"opcache.fast_shutdown" = "1";
-  		          #"opcache.interned_strings_buffer" = "10";
-  		          #"opcache.max_accelerated_files" = "10000";
-  		          #"opcache.memory_consumption" = "128";
-  		          #"opcache.revalidate_freq" = "1";
+                "opcache.fast_shutdown" = "1";
+  		          "opcache.interned_strings_buffer" = "10";
+  		          "opcache.max_accelerated_files" = "10000";
+  		          "opcache.memory_consumption" = "128";
+  		          "opcache.revalidate_freq" = "1";
   		          output_buffering = "0";
   		          short_open_tag = "Off"; };
   };
