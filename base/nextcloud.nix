@@ -22,7 +22,7 @@ in
         };
         settings = {
                 trusted_domains = [ "${name}.local" ];
-                default_phone_region = "GR"; ### you can change this to your country
+                default_phone_region = "GR"; ### you can change this to your country code
                 log_type = "file";
 	        loglevel = 4;
 	        nginx.recommendedHttpHeaders =  true;
