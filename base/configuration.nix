@@ -22,7 +22,8 @@ in
 	  auto-optimise-store = true;
     require-sigs = false;
     substituters = [ "https://nix-community.cachix.org" ];
-	  trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
+	  trusted-substituters = [ "https://nix-community.cachix.org" ];
+    trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
   };
   nix.gc = {
 	  automatic = true;
@@ -56,7 +57,7 @@ in
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
   services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"
-                                    "10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"];
+                                    "40 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"];
   
   ########## SSH & Security ##########
   services.openssh.enable = true;
