@@ -41,6 +41,8 @@ in
 
   ###### Packages that are available systemwide. Most probably you don't need to change this. ######
   environment.systemPackages = [
+      pkgs.curl
+      pkgs.jq
       pkgs.htop
       pkgs.wget
       pkgs.avahi
@@ -52,7 +54,7 @@ in
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
   services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"
-                                    "0 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"];
+                                    "10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"];
   
   ########## SSH & Security ##########
   services.openssh.enable = true;
