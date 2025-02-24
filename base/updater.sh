@@ -19,7 +19,8 @@ else
   if ! cmp -s /tmp/version.txt $local_version; then
     echo "Changes detected!"
     echo "$new_version" > /etc/nixos/version.txt
-    #update command
+    DEVICE="$(cat /etc/nixos/device.txt)"
+    nixos-rebuild switch --flake github:jjacke13/nixtcloud/test#"$DEVICE"
   else
     echo "No changes detected." #>> update_log.txt
   fi
