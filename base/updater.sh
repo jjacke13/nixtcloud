@@ -1,33 +1,28 @@
 #!/bin/bash
+set -eo pipefail
 
-REPO_URL="https://github.com/jjacke13/nixtcloud.git"
-REPO_DIR="/home/admin/nixtcloud"
-BRANCH="test"
-DEVICE="$(cat /etc/nixos/device.txt)"
-
-# Check if the repo exists
-if [ -d "$REPO_DIR/.git" ]; then
-  echo "Repository exists. Checking for updates..."
-  cd "$REPO_DIR" || exit 1
-
-  # Fetch remote changes
-  git fetch origin "$BRANCH"
-
-  # Check if there are changes
-  if ! git diff --quiet HEAD origin/"$BRANCH"; then
-    echo "Changes detected, pulling latest version..."
-    git pull origin "$BRANCH"
-    
-    # Run the command only if there were changes
-    echo "Updating..."
-    nixos-rebuild switch --flake .#"$DEVICE"
-    
-  else
-    echo "No changes detected."
-  fi
+if [ ! -f /etc/nixos/version.txt ]; then
+  
+  local_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/test | jq -r '[.sha, .commit.author.date]')
+  echo "$local_version" > /etc/nixos/version.txt
+  echo "created"
+  
 else
-  echo "Repository not found. Cloning..."
-  git clone --branch "$BRANCH" --single-branch "$REPO_URL" "$REPO_DIR"
-  cd "$REPO_DIR" || exit 1
 
+  # Retrieve latest commit hash
+  new_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/test | jq -r '[.sha, .commit.author.date]')
+  echo "$new_version" > /tmp/version.txt
+  # Retrieve stored commit hash
+  local_version="/etc/nixos/version.txt"
+
+  # Compare hashes
+  if ! cmp -s /tmp/version.txt $local_version; then
+    echo "Changes detected!"
+    echo "$new_version" > /etc/nixos/version.txt
+    #update command
+  else
+    echo "No changes detected." #>> update_log.txt
+  fi
+  
 fi
+#echo "Check completed at $(date)" >> update_log.txt
