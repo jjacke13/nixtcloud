@@ -1,5 +1,10 @@
 #!/bin/bash
 set -eo pipefail
+LOG_FILE="/etc/nixos/updates.log"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
 
 if [ ! -f /etc/nixos/version.txt ]; then
   
@@ -20,7 +25,14 @@ else
     echo "Changes detected!"
     echo "$new_version" > /etc/nixos/version.txt
     DEVICE="$(cat /etc/nixos/device.txt)"
-    nixos-rebuild switch --flake github:jjacke13/nixtcloud/test#"$DEVICE"
+    log "Updating..."
+    nixos-rebuild switch --flake github:jjacke13/nixtcloud/test#"$DEVICE" 2>&1 | tee -a "$LOG_FILE"
+    if [ $? -ne 0 ]; then
+            log "Error: Failed to rebuild NixOS configuration."
+            exit 1
+    fi
+    log "Update completed successfully."
+  
   else
     echo "No changes detected." #>> update_log.txt
   fi
