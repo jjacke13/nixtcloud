@@ -2,6 +2,10 @@
 set -eo pipefail
 LOG_FILE="/etc/nixos/updates.log"
 
+if [ ! -f "$LOG_FILE" ]; then
+    touch "$LOG_FILE"
+fi
+
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
 }
