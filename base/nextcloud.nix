@@ -28,6 +28,7 @@ in
 	        nginx.recommendedHttpHeaders =  true;
 	        nginx.hstsMaxAge = 15553000000;
 	        maintenance_window_start = 1;
+          quota_include_external_storage = true;
         };
         maxUploadSize = "5000M";
         appstoreEnable = true;
