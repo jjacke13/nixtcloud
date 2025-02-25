@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-    name = "test";
+    name = "nixtcloud";
 in
 {
   #### Defining the admin password file. This file is used to set the admin password for the nextcloud instance. ####

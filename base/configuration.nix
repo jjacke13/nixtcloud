@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  name = "test";
+  name = "nixtcloud";
 in
 {
   imports =
