@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-    name = "nixtcloud";
+    name = "test";
 in
 {
   #### Defining the admin password file. This file is used to set the admin password for the nextcloud instance. ####
@@ -43,8 +43,7 @@ in
   		          "opcache.memory_consumption" = "128";
   		          "opcache.revalidate_freq" = "1";
   		          output_buffering = "0";
-  		          short_open_tag = "Off"; 
-        };
+  		          short_open_tag = "Off"; };
   };
   
 }

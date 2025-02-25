@@ -28,7 +28,8 @@
         system = "aarch64-linux";
         format = "sd-aarch64";
         modules = [
-          ./Rpi4/configuration.nix
+          ./base/configuration.nix
+          ./hardware/Rpi4.nix
           holesail.nixosModules.aarch64-linux.holesail
           self.nixosModules.state
         ];
@@ -40,7 +41,8 @@
     nixosConfigurations.Rpi4 = nixpkgs.lib.nixosSystem {
       modules = [
         holesail.nixosModules.aarch64-linux.holesail
-        ./Rpi4/configuration.nix 
+        ./base/configuration.nix
+        ./hardware/Rpi4.nix 
         self.nixosModules.state
       ];      
     };
@@ -51,7 +53,8 @@
         raspberry-pi-nix.nixosModules.raspberry-pi
         raspberry-pi-nix.nixosModules.sd-image
         holesail.nixosModules.aarch64-linux.holesail
-        ./Rpi5/configuration.nix 
+        ./base/configuration.nix
+        ./hardware/Rpi5.nix 
         self.nixosModules.state
       ];      
     };

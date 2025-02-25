@@ -1,18 +1,17 @@
 { config, lib, pkgs, ... }:
 let
-  name = "nixtcloud";
+  name = "test";
 in
 {
   imports =
-    [ ./hardware-configuration.nix
-      ./nextcloud.nix
+    [ ./nextcloud.nix
     ];
 
- networking.hostName = name; 
+  networking.hostName = name; 
   
-  ##### You can define your wireless network here if you don't want to use ethernet cable.   
+  #### You can define your wireless network here if you don't want to use ethernet cable.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  #networking.wireless.networks = { SSID = { psk = "pass"; };  };  
+  #networking.wireless.networks = { SSID = { psk = "pass"; };  };   
 
   # Set your time zone.
   time.timeZone = "auto";
@@ -21,7 +20,9 @@ in
   nix.settings = {
 	  experimental-features = "nix-command flakes";
 	  auto-optimise-store = true;
-    require-sigs = false;
+    #require-sigs = false;
+    substituters = [ "https://nix-community.cachix.org" ];
+	  trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
   };
   nix.gc = {
 	  automatic = true;
@@ -31,17 +32,19 @@ in
   ##########################################################################################
  
   ### DO NOT CHANGE the username. After the system is installed, you can change the password with 'passwd' command.
-  users.users.admin = {
+   users.users.admin = {
      isNormalUser = true;
      extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
      initialPassword = "admin";
-  };
+   };
   
   ### If you know what the following line does, you can uncomment it ;)
   #security.sudo.wheelNeedsPassword = false;
 
   ###### Packages that are available systemwide. Most probably you don't need to change this. ######
   environment.systemPackages = [
+      pkgs.curl
+      pkgs.jq
       pkgs.htop
       pkgs.wget
       pkgs.avahi
@@ -52,27 +55,28 @@ in
   ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
-  services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"];
+  services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"
+                                    "10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"];
   
   ########## SSH & Security ##########
   services.openssh.enable = true;
   services.openssh.settings.PermitRootLogin = "no";
-  #sers.users.admin.openssh.authorizedKeys.keys = [ "your key here"];
+  #users.users.admin.openssh.authorizedKeys.keys = [ "your key here"];
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 80 ];
-  };
-  ####################################
+  };  
+  #####################################
   
   #### DON'T CHANGE ANYTHING BELOW THIS LINE UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING ###
 
   ########## AVAHI ########## 
   services.avahi = {
     enable = true;
-    openFirewall = true;
     hostName = name;
     nssmdns4 = true; 
     reflector = true;
+    openFirewall = true;
     publish.enable = true;
     publish.userServices = true;
     publish.domain = true;
@@ -129,7 +133,7 @@ in
   ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.###### 
   systemd.services.mymnt = {
     enable = true;
-    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs ];
+    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs];
     serviceConfig = {
 		  Type = "simple";
 		  ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/mounter.sh";
@@ -147,7 +151,7 @@ in
   };
   ###############################################################################
   
-  ### The following service enables the share of the Public folder with Holesail ####
+  ### The following service enables the share of the Public folder with Holesail ###
   services.holesail-filemanager.p2public = {
   	enable = true;
   	connector-file = "/mnt/Public/public.txt";
@@ -181,12 +185,15 @@ in
     mode = "0774";
     group = "wheel";
   };
-  ##############################################################################################################
-  
 
+  environment.etc."nixos/updater.sh" = { 
+    source = ./updater.sh;
+    mode = "0774";
+    group = "wheel";
+  };
+  
+  ##############################################################################################################
 
 }
 
 
-  
-  
