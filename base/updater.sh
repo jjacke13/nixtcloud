@@ -12,14 +12,14 @@ log() {
 
 if [ ! -f /etc/nixos/version.txt ]; then
   
-  local_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/test | jq -r '[.sha, .commit.author.date]')
+  local_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/main | jq -r '[.sha, .commit.author.date]')
   echo "$local_version" > /etc/nixos/version.txt
   echo "created"
   
 else
 
   # Retrieve latest commit hash
-  new_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/test | jq -r '[.sha, .commit.author.date]')
+  new_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/main | jq -r '[.sha, .commit.author.date]')
   echo "$new_version" > /tmp/version.txt
   # Retrieve stored commit hash
   local_version="/etc/nixos/version.txt"
@@ -30,7 +30,7 @@ else
     echo "$new_version" > /etc/nixos/version.txt
     DEVICE="$(cat /etc/nixos/device.txt)"
     log "Updating..."
-    nixos-rebuild switch --flake github:jjacke13/nixtcloud/test#"$DEVICE" 2>&1 | tee -a "$LOG_FILE"
+    nixos-rebuild switch --flake github:jjacke13/nixtcloud/main#"$DEVICE" 2>&1 | tee -a "$LOG_FILE"
     if [ $? -ne 0 ]; then
             log "Error: Failed to rebuild NixOS configuration."
             exit 1
