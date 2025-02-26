@@ -21,9 +21,9 @@
     nixosModules.state = { system.stateVersion = "24.11"; };
 
     packages.aarch64-linux = {
-      Rpi4-sd-card = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
+      Rpi4 = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
 
-      Rpi5-sd-card = self.nixosConfigurations.Rpi5.config.system.build.sdImage;
+      Rpi5 = self.nixosConfigurations.Rpi5.config.system.build.sdImage;
     };
     
     nixosConfigurations= {
