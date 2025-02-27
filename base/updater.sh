@@ -38,8 +38,8 @@ else
     log "Update completed successfully."
   
   else
-    echo "No changes detected." #>> update_log.txt
+    log "No changes detected." 
   fi
   
 fi
-#echo "Check completed at $(date)" >> update_log.txt
+log "Check completed at $(date)"

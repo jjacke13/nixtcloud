@@ -11,52 +11,43 @@
   
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     holesail.url = "github:jjacke13/holesail-nix";
     raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
-  outputs = { self, nixpkgs, nixos-generators, holesail, raspberry-pi-nix, ... }:
+  outputs = { self, nixpkgs, holesail, raspberry-pi-nix, nixos-hardware, ... }:
   {
     nixosModules.state = { system.stateVersion = "24.11"; };
 
     packages.aarch64-linux = {
-      Rpi4 = nixos-generators.nixosGenerate {
-        system = "aarch64-linux";
-        format = "sd-aarch64";
-        modules = [
-          ./base/configuration.nix
-          ./hardware/Rpi4.nix
-          holesail.nixosModules.aarch64-linux.holesail
-          self.nixosModules.state
-        ];
-      };
+      Rpi4 = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
 
       Rpi5 = self.nixosConfigurations.Rpi5.config.system.build.sdImage;
     };
     
-    nixosConfigurations.Rpi4 = nixpkgs.lib.nixosSystem {
-      modules = [
-        holesail.nixosModules.aarch64-linux.holesail
-        ./base/configuration.nix
-        ./hardware/Rpi4.nix 
-        self.nixosModules.state
-      ];      
-    };
+    nixosConfigurations= {
+      Rpi4 = nixpkgs.lib.nixosSystem {
+        modules = [
+          holesail.nixosModules.aarch64-linux.holesail
+          ./base/configuration.nix
+          ./hardware/Rpi4.nix
+          nixos-hardware.nixosModules.raspberry-pi-4
+          "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+          self.nixosModules.state
+        ];      
+      };
 
-    nixosConfigurations.Rpi5 = nixpkgs.lib.nixosSystem {
-      system = "aarch64-linux";
-      modules = [
-        raspberry-pi-nix.nixosModules.raspberry-pi
-        raspberry-pi-nix.nixosModules.sd-image
-        holesail.nixosModules.aarch64-linux.holesail
-        ./base/configuration.nix
-        ./hardware/Rpi5.nix 
-        self.nixosModules.state
-      ];      
+      Rpi5 = nixpkgs.lib.nixosSystem {
+        modules = [
+          holesail.nixosModules.aarch64-linux.holesail
+          ./base/configuration.nix
+          ./hardware/Rpi5.nix
+          raspberry-pi-nix.nixosModules.raspberry-pi
+          raspberry-pi-nix.nixosModules.sd-image 
+          self.nixosModules.state
+        ];      
+      };
     };
   };
 }
