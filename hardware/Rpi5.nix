@@ -5,6 +5,15 @@
 {
   raspberry-pi-nix.board = "bcm2712";
 
+  boot.initrd.availableKernelModules = [
+          "nvme"
+          "usbhid"
+          "usb_storage"
+          "vc4"
+          "pcie_brcmstb" 
+          "reset-raspberrypi" 
+        ];
+
   fileSystems."/" =
     { device = "/dev/disk/by-label/NIXOS_SD";
       fsType = "ext4";
