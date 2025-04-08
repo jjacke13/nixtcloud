@@ -5,7 +5,7 @@ This implementation is based on the works of many amazing people. I just aim to 
 
 - Easy automated install of Nextcloud (no special linux/NixOS knowledge required)
 - Minimal periodic maintenance
-- Automated mounting of usb devices as nextcloud external storage (Currently FAT, ext4 and exfat formats supported. Probably others in the future).
+- Automated mounting of usb devices as nextcloud external storage (Currently FAT, ext4 and exfat formats supported. NTFS added :)  Probably others in the future).
 - very easy remote access to your Nextcloud, using the Holesail app in Android/iOS, Linux, Windows or MacOS just by scanning a qr code or copying a string.
 - Privacy for everyone 
 
@@ -45,6 +45,6 @@ If you accidentally delete remote.txt file or public.txt file, don't worry. Just
 
 If you connect a usb device on your Pi, wait 30 sec and then it will be available as Nextcloud external storage ;) You can connect multiple usb devices with an externally powered usb hub or a Pi usb hub hat. Just be carefull for the temperature...
   
-
+***Test branch now supports NTFS usb devices! Bring your windows friends :P ****
 
 *** This project is new and subject to changes without notification :P ***
