@@ -44,6 +44,10 @@ for device in $(lsblk -rpno NAME,TYPE | grep 'disk' | awk '{print $1}'); do
 		            elif [ "$fs_type" = "exfat" ]; then
                         # Mount for exfat filesystem
                         mount -t exfat -o rw,uid=$uid,gid=$gid "$device" "$device_mount_dir"
+                    elif [ "$fs_type" = "ntfs" ]; then
+                        # Mount for ntfs filesystem
+                        mount -t ntfs3 -o rw,uid=$uid,gid=$gid "$device" "$device_mount_dir"
+                        sleep 15
                     else
                         echo "Unsupported filesystem type: $fs_type for $device"
                         continue
@@ -85,6 +89,10 @@ for device in $(lsblk -rpno NAME,TYPE | grep 'disk' | awk '{print $1}'); do
                     elif [ "$fs_type" = "exfat" ]; then
                         # Mount for exfat filesystem
                         mount -t exfat -o rw,uid=$uid,gid=$gid "$partition" "$device_mount_dir"
+                    elif [ "$fs_type" = "ntfs" ]; then
+                        # Mount for ntfs filesystem
+                        mount -t ntfs3 -o rw,uid=$uid,gid=$gid "$partition" "$device_mount_dir"
+                        sleep 15
                     else
                         echo "Unsupported filesystem type: $fs_type for $partition"
                         continue

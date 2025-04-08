@@ -7,6 +7,8 @@
   hardware.enableAllHardware = lib.mkForce false;
   boot.supportedFilesystems.zfs = lib.mkForce false;
   security.rtkit.enable = true;
+
+  boot.kernelModules = [ "ntfs3" ];
   
   fileSystems."/" =
     { device = "/dev/disk/by-label/NIXOS_SD";

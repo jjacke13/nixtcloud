@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  name = "test";
+  name = "nixtcloud";
 in
 {
   imports =
@@ -55,7 +55,7 @@ in
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
   services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"
-                                    "10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"];
+                                    /*"10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"*/];
   
   ########## SSH & Security ##########
   services.openssh.enable = true;
@@ -132,12 +132,12 @@ in
   ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.###### 
   systemd.services.mymnt = {
     enable = true;
-    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs];
+    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs ];
     serviceConfig = {
 		  Type = "simple";
 		  ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/mounter.sh";
 		  Restart = "always";
-		  RestartSec = "30";  
+		  RestartSec = "30";
 	  };
   };
   ################################################################################

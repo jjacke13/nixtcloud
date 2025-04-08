@@ -13,6 +13,8 @@
           "pcie_brcmstb" 
           "reset-raspberrypi" 
         ];
+  
+  boot.kernelModules = [ "ntfs3" ];
 
   fileSystems."/" =
     { device = "/dev/disk/by-label/NIXOS_SD";
