@@ -21,7 +21,7 @@ in
                 adminpassFile = "/etc/nixos/adminpass.txt";
         };
         settings = {
-                trusted_domains = [ "${name}.local" ];
+                trusted_domains = [ "${name}.local" "192.168.*.*" ];
                 default_phone_region = "GR"; ### you can change this to your country code
                 log_type = "file";
 	        loglevel = 4;
