@@ -28,6 +28,8 @@ in
 	  dates = "weekly";
 	  options = "--delete-older-than 5d";
   };
+  documentation.enable = false;
+  documentation.nixos.enable = false;
   ##########################################################################################
  
   ### DO NOT CHANGE the username. After the system is installed, you can change the password with 'passwd' command.
