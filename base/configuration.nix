@@ -10,8 +10,8 @@ in
   networking.hostName = name; 
   
   #### You can define your wireless network here if you don't want to use ethernet cable.
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.wireless.networks = { jacke = { psk = "2018ypsgos"; };  };   
+  #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  #networking.wireless.networks = { jacke = { psk = "pass"; };  };   
 
   # Set your time zone.
   time.timeZone = "auto";
@@ -22,6 +22,7 @@ in
 	  auto-optimise-store = true;
     substituters = [ "https://nix-community.cachix.org" ];
 	  trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
+    require-sigs = false;
   };
   nix.gc = {
 	  automatic = true;
