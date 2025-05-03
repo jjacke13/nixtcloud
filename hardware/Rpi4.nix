@@ -19,8 +19,6 @@
   networking.hostId = lib.mkForce null;
   networking.useDHCP = lib.mkDefault true;
   nixpkgs.hostPlatform = "aarch64-linux";
-  #nixpkgs.crossSystem = { system = "aarch64-linux"; };
-  #nixpkgs.localSystem = {system = "x86_64-linux";};
   
   environment.etc."nixos/device.txt" = { 
     text = ''Rpi4'';
