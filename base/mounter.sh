@@ -1,6 +1,33 @@
 #!/bin/bash
 uid=$(id -u nextcloud)
 gid=$(id -g nextcloud)
+
+########## First the ummounter part #################
+## We unmount from nextcloud any external storages that point to usb devices that have been unplugged ########
+
+# Specify the directory to check
+CHECK_DIR="/mnt/usb"
+
+# Loop through each directory in the specified directory
+for mount_point in "$CHECK_DIR"/*; do
+    echo "1"
+    if [ -d "$mount_point" ]; then
+        # Check if the mount point is mounted
+        if ! lsblk -o MOUNTPOINT | grep -q "$mount_point"; then
+            folder_name="/${mount_point##*/}"
+	        echo "Mount point without device: $folder_name"
+            i=$(/run/current-system/sw/bin/nextcloud-occ files_external:list | grep "$folder_name" | awk '{print $2}')
+            echo "$i"
+            if [ -n "$i" ]; then 
+                /run/current-system/sw/bin/nextcloud-occ files_external:delete -y $i
+            fi
+	    fi
+    fi
+done
+##################################################
+
+####### And now we go ahead and mount any unmounted usb devices and give them as external storages to nextcloud #######
+
 # Define the directory where you want to mount USB devices
     MOUNT_DIR="/mnt/usb"
     # Define the user who should own the mounted directories
@@ -118,24 +145,3 @@ for device in $(lsblk -rpno NAME,TYPE | grep 'disk' | awk '{print $1}'); do
     fi
 done
 
-########## Now the ummounter part #################
-
-# Specify the directory to check
-CHECK_DIR="/mnt/usb"
-
-# Loop through each directory in the specified directory
-for mount_point in "$CHECK_DIR"/*; do
-    echo "1"
-    if [ -d "$mount_point" ]; then
-        # Check if the mount point is mounted
-        if ! lsblk -o MOUNTPOINT | grep -q "$mount_point"; then
-            folder_name="/${mount_point##*/}"
-	        echo "Mount point without device: $folder_name"
-            i=$(/run/current-system/sw/bin/nextcloud-occ files_external:list | grep "$folder_name" | awk '{print $2}')
-            echo "$i"
-            if [ -n "$i" ]; then 
-                /run/current-system/sw/bin/nextcloud-occ files_external:delete -y $i
-            fi
-	    fi
-    fi
-done

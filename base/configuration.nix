@@ -57,8 +57,8 @@ in
   ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
-  services.cron.systemCronJobs = ["0 2 * * *    root    /run/current-system/sw/bin/reboot"
-                                    /*"10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"*/];
+  services.cron.systemCronJobs = [ /* "0 2 * * *    root    /run/current-system/sw/bin/reboot"
+                                     "10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"*/];
   
   ########## SSH & Security ##########
   services.openssh.enable = true;
