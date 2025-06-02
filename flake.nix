@@ -10,7 +10,7 @@
   };
   
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     holesail.url = "github:jjacke13/holesail-nix";
     raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
