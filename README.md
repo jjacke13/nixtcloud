@@ -1,10 +1,10 @@
 # Nixtcloud
 
-[![NixOS](https://img.shields.io/badge/NixOS-24.11-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
+[![NixOS](https://img.shields.io/badge/NixOS-25.05-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
 [![Nextcloud](https://img.shields.io/badge/Nextcloud-30-orange.svg?style=flat-square&logo=nextcloud)](https://nextcloud.com)
 [![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-4%20%7C%205-c51a4a.svg?style=flat-square&logo=raspberry-pi)](https://www.raspberrypi.org)
 [![Holesail](https://img.shields.io/badge/P2P-Holesail-purple.svg?style=flat-square)](https://holesail.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
 
 Transform your Raspberry Pi into a powerful, self-hosted cloud storage server with **one command**. Nixtcloud combines NixOS's reproducibility with Nextcloud's versatility to create an automated personal cloud that's accessible from anywhere through secure P2P connections.
 
