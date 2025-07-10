@@ -46,8 +46,8 @@ Flash the resulting image to an SD card, boot your Pi, and visit `http://nixtclo
 ## 🧰 What You Need
 
 **Hardware**:
-- Raspberry Pi 4 or 5 (≥ 4GB RAM)
-- SD card (32GB+)
+- Raspberry Pi 4 or 5 (≥ 2GB RAM)
+- SD card (16GB+)
 - Ethernet connection
 - Optional: USB drives
 
