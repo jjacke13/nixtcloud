@@ -129,7 +129,7 @@ Your Nixtcloud automatically generates P2P connection credentials:
 
 Nixtcloud automatically detects and mounts USB drives:
 
-- **Supported filesystems**: FAT32, exFAT, ext4
+- **Supported filesystems**: FAT32, exFAT, ext4, NTFS
 - **Auto-mount delay**: 30 seconds after connection
 - **Nextcloud integration**: Appears as external storage automatically
 - **Multiple devices**: Support for USB hubs
