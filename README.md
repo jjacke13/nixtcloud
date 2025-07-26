@@ -113,15 +113,22 @@ After flashing and booting your Raspberry Pi:
 
 ---
 
-## 🌍 Remote Access, No Router Hacks Required
+### Remote Access with Holesail
 
-Using Holesail:
-- Encrypted P2P tunnel
-- Credentials delivered as `remote.txt` and a QR image inside your Nextcloud
-- Public folder sharing via separate connection string
+To access your Nixtcloud from anywhere in the world:
 
-> Want to access your files while traveling without exposing ports? Done.
+1. **Install the Holesail app** on your mobile device:
+   - [Android](https://play.google.com/store/apps/details?id=io.holesail.mobile)
+   - [iOS](https://apps.apple.com/app/holesail/id6450930046)
+   - Or visit [holesail.io](https://holesail.io) for desktop versions
 
+2. **Connect to your Nextcloud**:
+   - Login to your Nixtcloud instance locally
+   - Find the `remote.jpg` QR code in your files
+   - Open Holesail app and scan the QR code
+   - Your Nextcloud is now accessible from anywhere!
+
+No port forwarding, no static IP, no VPN configuration needed - just scan and connect!
 ---
 
 ## ⚙️ Easy Customization
