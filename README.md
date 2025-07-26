@@ -113,7 +113,7 @@ After flashing and booting your Raspberry Pi:
 
 ---
 
-### Remote Access with Holesail
+## Remote Access with Holesail
 
 To access your Nixtcloud from anywhere in the world:
 
