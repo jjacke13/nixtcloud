@@ -118,8 +118,8 @@ After flashing and booting your Raspberry Pi:
 To access your Nixtcloud from anywhere in the world:
 
 1. **Install the Holesail app** on your mobile device:
-   - [Android](https://play.google.com/store/apps/details?id=io.holesail.mobile)
-   - [iOS](https://apps.apple.com/app/holesail/id6450930046)
+   - [Android](https://play.google.com/store/apps/details?id=io.holesail.holesail.go&pcampaignid=web_share)
+   - [iOS](https://apps.apple.com/us/app/holesail-go/id6503728841)
    - Or visit [holesail.io](https://holesail.io) for desktop versions
 
 2. **Connect to your Nextcloud**:
