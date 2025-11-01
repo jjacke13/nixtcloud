@@ -18,7 +18,7 @@
 
   outputs = { self, nixpkgs, holesail, raspberry-pi-nix, nixos-hardware, ... }:
   {
-    nixosModules.state = { system.stateVersion = "24.11"; };
+    nixosModules.state = { system.stateVersion = "25.05"; };
 
     packages.aarch64-linux = {
       Rpi4 = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
