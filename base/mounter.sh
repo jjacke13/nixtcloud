@@ -69,6 +69,13 @@ cleanup_unmounted_storage() {
                 log "Removing external storage ID: $storage_id"
                 "$NEXTCLOUD_OCC" files_external:delete -y "$storage_id"
             fi
+            
+            # Remove the empty mount point directory to prevent future conflicts
+            if rmdir "$mount_point" 2>/dev/null; then
+                log "Removed empty mount point directory: $mount_point"
+            else
+                log "Could not remove mount point directory (not empty?): $mount_point"
+            fi
         fi
     done
 }
