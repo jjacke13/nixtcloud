@@ -100,7 +100,7 @@ in
     wantedBy = [ "multi-user.target" ];
     after = ["network.target" "nextcloud-setup.service"];
     enable = true;
-    path = [ pkgs.coreutils pkgs.qrencode pkgs.pwgen ];
+    path = [ pkgs.coreutils pkgs.qrencode pkgs.openssl ];
     script = ''
           /run/current-system/sw/bin/nextcloud-occ app:enable files_external
           if [ ! -d /mnt/Public ]; then
@@ -118,7 +118,7 @@ in
           fi
           if [ ! -f /var/lib/nextcloud/data/admin/files/remote.txt ]; then
               touch /var/lib/nextcloud/data/admin/files/remote.txt
-              pwgen -1 -N 1 -s 35 | tr -d '\n' > /var/lib/nextcloud/data/admin/files/remote.txt
+              echo -n "hs://s000$(openssl rand -hex 32)" > /var/lib/nextcloud/data/admin/files/remote.txt
               qrencode -o /var/lib/nextcloud/data/admin/files/remote.jpg -r /var/lib/nextcloud/data/admin/files/remote.txt -s 10
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/remote.txt
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/remote.jpg
@@ -126,7 +126,7 @@ in
           fi
           if [ ! -f /mnt/Public/public.txt ]; then
               touch /mnt/Public/public.txt
-              pwgen -1 -N 1 -s 35 | tr -d '\n' > /mnt/Public/public.txt
+              echo -n "hs://s000$(openssl rand -hex 32)" > /mnt/Public/public.txt
               qrencode -o /mnt/Public/public.jpg -r /mnt/Public/public.txt -s 10
               chown -R nextcloud:nextcloud /mnt/Public
           fi
@@ -151,18 +151,18 @@ in
   };
   ################################################################################
   
-  #### The following sevice enables Holesail to do its magic ####
+  #### The following service enables Holesail to do its magic ####
   services.holesail-server.p2pmagic = {
   	enable = true;
   	port = 80;
-  	connector-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
+  	key-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
   };
   ###############################################################################
   
   ### The following service enables the share of the Public folder with Holesail ###
   services.holesail-filemanager.p2public = {
   	enable = true;
-  	connector-file = "/mnt/Public/public.txt";
+  	key-file = "/mnt/Public/public.txt";
     path = "/mnt/Public";
     username = "test";
     password = "test";
