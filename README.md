@@ -1,7 +1,7 @@
 # 🧊 Nixtcloud: Self-Hosted Cloud in One Command
 
 [![NixOS](https://img.shields.io/badge/NixOS-25.05-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
-[![Nextcloud](https://img.shields.io/badge/Nextcloud-30-orange.svg?style=flat-square&logo=nextcloud)](https://nextcloud.com)
+[![Nextcloud](https://img.shields.io/badge/Nextcloud-32-orange.svg?style=flat-square&logo=nextcloud)](https://nextcloud.com)
 [![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-4%20%7C%205-c51a4a.svg?style=flat-square&logo=raspberry-pi)](https://www.raspberrypi.org)
 [![P2P: Holesail](https://img.shields.io/badge/P2P-Holesail-purple.svg?style=flat-square)](https://holesail.io)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
@@ -106,10 +106,10 @@ After flashing and booting your Raspberry Pi:
 
 ## 🔌 Plug & Play External Storage
 
-- Works with ext4, exFAT, FAT32
+- Works with ext4, exFAT, FAT32, NTFS
 - Auto-detected and mounted
 - Appears in Nextcloud as external storage
-- Supports hot-swap and multiple devices
+- Supports multiple partitions per device
 
 ---
 
@@ -147,7 +147,7 @@ time.timeZone = "Europe/Berlin";
 ## 🧱 Under the Hood
 
 - **NixOS** for immutability and reproducibility
-- **Nextcloud 30** + PostgreSQL + Redis
+- **Nextcloud 32** + PostgreSQL + Redis
 - **Holesail** for P2P remote access
 - Custom systemd services:
   - `startup.service`
