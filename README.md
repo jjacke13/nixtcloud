@@ -1,4 +1,4 @@
-# This is the test branch! All new changes are being test here. Also, the test branch of Holesail is being used here.
+# This is the test branch! All new changes are being tested here. Also, the test branch of Holesail is being used here.
 
 # 🧊 Nixtcloud: Self-Hosted Cloud in One Command
 
