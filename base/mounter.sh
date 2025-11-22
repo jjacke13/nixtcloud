@@ -91,8 +91,9 @@ get_mount_options() {
             echo "rw,uid=$uid,gid=$gid"
             ;;
         ntfs)
-            # NTFS: set ownership via mount options  
-            echo "rw,uid=$uid,gid=$gid"
+            # NTFS: mount with ownership and force flag for dirty volumes
+            # chown after mounting handles existing files that ntfs3 doesn't set properly
+            echo "rw,uid=$uid,gid=$gid,force"
             ;;
         ext4|ext3|ext2)
             # Linux filesystems: use regular permissions (chown after mount)
@@ -111,7 +112,7 @@ get_mount_type() {
     
     case "$fs_type" in
         ntfs)
-            # Use modern ntfs3 driver
+            # Use modern ntfs3 driver  
             echo "ntfs3"
             ;;
         exfat)
@@ -158,9 +159,11 @@ mount_device() {
             chown -R "$NEXTCLOUD_USER:$NEXTCLOUD_USER" "$mount_point"
         fi
         
-        # NTFS sometimes needs time to settle
+        # NTFS sometimes needs time to settle and fix ownership
         if [[ "$fs_type" == "ntfs" ]]; then
             sleep 15
+            # Fix ownership of existing files that ntfs3 doesn't handle properly
+            chown -R "$NEXTCLOUD_USER:$NEXTCLOUD_USER" "$mount_point"
         fi
         
         log "Successfully mounted $device"
