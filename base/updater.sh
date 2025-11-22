@@ -25,11 +25,11 @@ if [ -f "$VERSION_FILE" ] && [ "$latest" = "$(cat "$VERSION_FILE")" ]; then
     exit 0
 fi
 
-log "Update available - rebuilding"
+log "Update available: $(echo "$latest" | jq -r '.[0]' | cut -c1-8) - rebuilding"
 DEVICE=$(cat /etc/nixos/device.txt)
 if nixos-rebuild boot --flake "github:jjacke13/nixtcloud/test#$DEVICE" 2>&1 | tee -a "$LOG_FILE"; then
     echo "$latest" > "$VERSION_FILE"
-    log "Update completed - rebooting in 30s"
+    log "Update completed: $(echo "$latest" | jq -r '.[0]' | cut -c1-8) - rebooting in 30s"
     sleep 30 && reboot
 else
     log "Build failed"
