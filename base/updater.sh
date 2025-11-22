@@ -1,45 +1,36 @@
 #!/bin/bash
 set -eo pipefail
+
 LOG_FILE="/etc/nixos/updates.log"
+VERSION_FILE="/etc/nixos/version.txt" 
+RELEASES_URL="https://api.github.com/repos/jjacke13/nixtcloud/releases/latest"
 
-if [ ! -f "$LOG_FILE" ]; then
-    touch "$LOG_FILE"
+log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"; }
+
+# Quick connectivity check
+if ! curl -sf --max-time 10 "https://api.github.com" >/dev/null; then
+    log "No internet connectivity - skipping update check"
+    exit 0
 fi
 
-log() {
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
-}
+# Get latest release from GitHub
+if ! latest=$(curl -sf --max-time 30 "$RELEASES_URL" | jq -r '.tag_name'); then
+    log "Failed to fetch latest release - skipping update"
+    exit 0
+fi
 
-if [ ! -f /etc/nixos/version.txt ]; then
-  
-  local_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/main | jq -r '[.sha, .commit.author.date]')
-  echo "$local_version" > /etc/nixos/version.txt
-  echo "created"
-  
+# Compare with stored version
+if [ -f "$VERSION_FILE" ] && [ "$latest" = "$(cat "$VERSION_FILE")" ]; then
+    log "No changes detected"
+    exit 0
+fi
+
+log "Update available: $latest - rebuilding"
+DEVICE=$(cat /etc/nixos/device.txt)
+if nixos-rebuild boot --flake "github:jjacke13/nixtcloud/$latest#$DEVICE" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "$latest" > "$VERSION_FILE"
+    log "Update completed: $latest - rebooting in 30s"
+    sleep 30 && reboot
 else
-
-  # Retrieve latest commit hash
-  new_version=$(curl https://api.github.com/repos/jjacke13/nixtcloud/commits/main | jq -r '[.sha, .commit.author.date]')
-  echo "$new_version" > /tmp/version.txt
-  # Retrieve stored commit hash
-  local_version="/etc/nixos/version.txt"
-
-  # Compare hashes
-  if ! cmp -s /tmp/version.txt $local_version; then
-    echo "Changes detected!"
-    echo "$new_version" > /etc/nixos/version.txt
-    DEVICE="$(cat /etc/nixos/device.txt)"
-    log "Updating..."
-    nixos-rebuild switch --flake github:jjacke13/nixtcloud/main#"$DEVICE" 2>&1 | tee -a "$LOG_FILE"
-    if [ $? -ne 0 ]; then
-            log "Error: Failed to rebuild NixOS configuration."
-            exit 1
-    fi
-    log "Update completed successfully."
-  
-  else
-    log "No changes detected." 
-  fi
-  
+    log "Build failed"
 fi
-log "Check completed at $(date)"
