@@ -6,6 +6,8 @@
   
   hardware.enableAllHardware = lib.mkForce false;
   boot.supportedFilesystems.zfs = lib.mkForce false;
+  boot.kernelModules = [ "ntfs3" ];
+  
   security.rtkit.enable = true;
   
   fileSystems."/" =

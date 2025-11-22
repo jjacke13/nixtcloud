@@ -5,6 +5,8 @@
 {
   raspberry-pi-nix.board = "bcm2712";
 
+  boot.kernelModules = [ "ntfs3" ];
+
   fileSystems."/" =
     { device = "/dev/disk/by-label/NIXOS_SD";
       fsType = "ext4";
