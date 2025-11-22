@@ -54,17 +54,17 @@ in
       pkgs.curl
       pkgs.jq
       pkgs.htop
-      pkgs.wget
       pkgs.avahi
-      pkgs.nssmdns  
-      pkgs.cron
+      pkgs.nssmdns
   ];  
 
   ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
-  services.cron.systemCronJobs = [ /* "0 2 * * *    root    /run/current-system/sw/bin/reboot"
-                                     "10 * * * *    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"*/];
+  services.cron.systemCronJobs = [ 
+    #"0 2 * * *    root    /run/current-system/sw/bin/reboot"
+     "0 3 * * 0    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"
+  ];
   
   ########## SSH & Security ##########
   services.openssh.enable = true;
@@ -190,13 +190,13 @@ in
   ###### Defining the mounter script. This script mounts the external usb devices with correct permissions. ######
   environment.etc."nixos/mounter.sh" = { 
     source = ./mounter.sh;
-    mode = "0774";
+    mode = "0744";
     group = "wheel";
   };
 
   environment.etc."nixos/updater.sh" = { 
     source = ./updater.sh;
-    mode = "0774";
+    mode = "0744";
     group = "wheel";
   };
   
