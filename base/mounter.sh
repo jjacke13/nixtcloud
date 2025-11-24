@@ -91,9 +91,10 @@ get_mount_options() {
             echo "rw,uid=$uid,gid=$gid"
             ;;
         ntfs)
-            # NTFS: mount with ownership and force flag for dirty volumes
+            # NTFS: mount with ownership, secure permissions, and force flag for dirty volumes
+            # fmask=133 gives files 644 permissions, dmask=022 gives directories 755 permissions
             # chown after mounting handles existing files that ntfs3 doesn't set properly
-            echo "rw,uid=$uid,gid=$gid,force"
+            echo "rw,uid=$uid,gid=$gid,fmask=133,dmask=022,force"
             ;;
         ext4|ext3|ext2)
             # Linux filesystems: use regular permissions (chown after mount)
@@ -150,7 +151,7 @@ mount_device() {
     
     local mount_cmd="mount"
     [[ -n "$mount_type" ]] && mount_cmd+=" -t $mount_type"
-    mount_cmd+=" -o $mount_opts $device $mount_point"
+    mount_cmd+=" -o $mount_opts $device \"$mount_point\""
     
     log "Mounting $device ($fs_type) at $mount_point"
     if eval "$mount_cmd"; then
@@ -164,6 +165,8 @@ mount_device() {
             sleep 15
             # Fix ownership of existing files that ntfs3 doesn't handle properly
             chown -R "$NEXTCLOUD_USER:$NEXTCLOUD_USER" "$mount_point"
+            # Set secure permissions on mount point directory for Nextcloud admin UI
+            chmod 755 "$mount_point"
         fi
         
         log "Successfully mounted $device"
