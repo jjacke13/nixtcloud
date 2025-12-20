@@ -10,7 +10,7 @@
   };
   
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     holesail.url = "github:jjacke13/holesail-nix/test";
     raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -18,7 +18,7 @@
 
   outputs = { self, nixpkgs, holesail, raspberry-pi-nix, nixos-hardware, ... }:
   {
-    nixosModules.state = { system.stateVersion = "25.05"; };
+    nixosModules.state = { system.stateVersion = "25.11"; };
 
     packages.aarch64-linux = {
       Rpi4 = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
