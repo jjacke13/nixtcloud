@@ -29,14 +29,15 @@ log() {
 # This handles both properly unmounted devices and stale mounts from unplugged devices
 cleanup_unmounted_storage() {
     log "Cleaning up unmounted external storages..."
-    
+
     for mount_point in "$MOUNT_DIR"/*; do
         [[ -d "$mount_point" ]] || continue
-        
+
         local needs_cleanup=false
-        
+
         if ! findmnt -M "$mount_point" &>/dev/null; then
-            # Mount point is not mounted - normal case
+            # Mount point is not mounted, mark for cleanup
+            log "Found unmounted storage at $mount_point, marking for cleanup"
             needs_cleanup=true
         else
             # Mount point appears mounted, but check if it's a stale mount
@@ -170,7 +171,8 @@ mount_device() {
         fi
         
         log "Successfully mounted $device"
-        # Create Nextcloud external storage entry pointing to the mount
+        # Create Nextcloud external storage entry
+        log "Creating external storage entry for /$label"
         "$NEXTCLOUD_OCC" files_external:create "/$label" local null::null -c datadir="$mount_point"
         return 0
     else
