@@ -32,4 +32,10 @@
     mode = "0644";
     group = "wheel";
   };
+
+  ######## SD-card longevity options #########
+  imports =
+    [ ./sd-card-friendly.nix
+    ];
+  ############################################
 }
