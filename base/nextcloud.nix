@@ -44,8 +44,6 @@ in
         enable = true;
         package = pkgs.nextcloud32;
         hostName = name;
-        https = true;
-        nginx.hstsMaxAge = 1; # Minimal HSTS (1 second) to allow HTTP on port 80
         database.createLocally = true;
         config = {
           dbtype = "sqlite";
