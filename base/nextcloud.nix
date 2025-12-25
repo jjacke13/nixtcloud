@@ -84,9 +84,11 @@ in
       { addr = "0.0.0.0"; port = 80; ssl = false; }
       { addr = "0.0.0.0"; port = 443; ssl = true; }
     ];
-    # SSL certificate configuration
-    sslCertificate = "${sslCertDir}/cert.pem";
-    sslCertificateKey = "${sslCertDir}/key.pem";
+    # Directly inject SSL certificate directives
+    extraConfig = ''
+      ssl_certificate ${sslCertDir}/cert.pem;
+      ssl_certificate_key ${sslCertDir}/key.pem;
+    '';
   };
 
 }
