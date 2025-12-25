@@ -37,6 +37,4 @@
     fsType = "tmpfs";
     options = [ "mode=0700" "size=10M" ];
   };
-  
-  services.ntp.enable = true;
 }
