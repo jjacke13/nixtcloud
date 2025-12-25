@@ -55,7 +55,6 @@ in
           default_phone_region = "GR"; ### you can change this to your country code
           log_type = "file";
 	        loglevel = 4;
-	        nginx.hstsMaxAge = 15553000000;
 	        maintenance_window_start = 1;
           quota_include_external_storage = true;
         };
@@ -77,26 +76,36 @@ in
         };
   };
 
+  # Map to set HTTPS parameter based on actual port (needed because https = false in config)
+  services.nginx.appendHttpConfig = ''
+    map $server_port $php_https {
+      default off;
+      443 on;
+    }
+  '';
+
   # Configure Nextcloud nginx virtualHost for dual-port access
   # Port 80: HTTP for localhost (P2P tunnel access)
   # Port 443: HTTPS for nixtcloud.local (local network access)
   services.nginx.virtualHosts.nixtcloud = {
-    listen = lib.mkForce [
+    listen = [
       { addr = "0.0.0.0"; port = 80; ssl = false; }
       { addr = "0.0.0.0"; port = 443; ssl = true; }
     ];
-    serverName = "localhost ${name}.local";
-    # SSL certificate directives (only used for port 443)
+    # SSL certificate configuration
+    sslCertificate = "${sslCertDir}/cert.pem";
+    sslCertificateKey = "${sslCertDir}/key.pem";
+    # Force HTTPS for local network access (nixtcloud.local), keep HTTP for localhost (P2P)
     extraConfig = ''
-      ssl_certificate /var/lib/nixtcloud/ssl/cert.pem;
-      ssl_certificate_key /var/lib/nixtcloud/ssl/key.pem;
+      # Override the HTTPS parameter to use our conditional value
+      fastcgi_param HTTPS $php_https;
 
-      # Set HTTPS parameter only when actually using HTTPS
-      set $custom_https off;
-      if ($server_port = 443) {
-        set $custom_https on;
+      # Redirect HTTP to HTTPS for nixtcloud.local only
+      if ($host = ${name}.local) {
+        if ($server_port = 80) {
+          return 301 https://$host$request_uri;
+        }
       }
-      fastcgi_param HTTPS $custom_https;
     '';
   };
 
