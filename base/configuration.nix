@@ -97,6 +97,7 @@ in
     path = [ pkgs.coreutils pkgs.qrencode pkgs.openssl ];
     script = ''
           /run/current-system/sw/bin/nextcloud-occ app:enable files_external
+          /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup
           if [ ! -d /mnt/Public ]; then
               mkdir -p /mnt/Public
               chown -R nextcloud:nextcloud /mnt/Public
