@@ -67,6 +67,11 @@ in
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 80 ];
+    ## We add the following to firewall so Nixtcloud can be accessed with Holesail not only remotely, but also from the local network
+    extraCommands = ''
+      # Allow connections from common home network IP ranges
+      iptables -A nixos-fw -s 192.168.0.0/16 -j nixos-fw-accept
+    '';
   };  
   #####################################
   
