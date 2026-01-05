@@ -19,7 +19,7 @@ in
   ########## Most probably you don't need and don't want to change the nix settings below #########
   nix.settings = {
 	  experimental-features = "nix-command flakes";
-	  auto-optimise-store = true;
+	  auto-optimise-store = false; #fewer writes to sd-card
     substituters = [ "https://nix-community.cachix.org" ];
 	  trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
     require-sigs = false;
