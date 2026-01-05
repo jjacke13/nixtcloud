@@ -60,7 +60,7 @@ in
         };
         maxUploadSize = "5000M";
         appstoreEnable = true;
-        extraAppsEnable = true;
+        extraAppsEnable = false; #we use Nextcloud's appstore
         configureRedis = true;
         caching.apcu = true;
         caching.redis = true;
