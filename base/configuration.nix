@@ -55,9 +55,13 @@ in
   ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
   ### I added this because I think it is good to reboot once a day to keep the system healthy.
   services.cron.enable = true;
-  services.cron.systemCronJobs = [ 
+  services.cron.systemCronJobs = [
     #"0 2 * * *    root    /run/current-system/sw/bin/reboot"
+     "0 2 * * *    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:repair"
+     "5 2 * * 0    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-db"
+     "10 2 * * 0   root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-js"
      "0 3 * * 0    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"
+     "0 15 * * 5   root    /run/current-system/sw/bin/bash /etc/nixos/backup-reminder.sh"
   ];
   
   ########## SSH & Security ##########
@@ -198,12 +202,11 @@ in
     group = "wheel";
   };
 
-  environment.etc."nixos/updater.sh" = { 
+  environment.etc."nixos/updater.sh" = {
     source = ./updater.sh;
     mode = "0744";
     group = "wheel";
   };
-  
   ##############################################################################################################
 
 }
