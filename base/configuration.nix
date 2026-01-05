@@ -102,7 +102,11 @@ in
     path = [ pkgs.coreutils pkgs.qrencode pkgs.openssl ];
     script = ''
           /run/current-system/sw/bin/nextcloud-occ app:enable files_external
+          /run/current-system/sw/bin/nextcloud-occ app:enable contacts
+          /run/current-system/sw/bin/nextcloud-occ app:enable calendar
+          /run/current-system/sw/bin/nextcloud-occ app:enable notes
           /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup
+          /run/current-system/sw/bin/nextcloud-occ app:disable music 
           if [ ! -d /mnt/Public ]; then
               mkdir -p /mnt/Public
               chown -R nextcloud:nextcloud /mnt/Public
