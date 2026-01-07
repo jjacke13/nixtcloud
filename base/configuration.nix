@@ -58,11 +58,11 @@ in
   services.cron.enable = true;
   services.cron.systemCronJobs = [
     #"0 2 * * *    root    /run/current-system/sw/bin/reboot"
-     "0 2 * * *    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:repair"
-     "5 2 * * 0    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-db"
-     "10 2 * * 0   root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-js"
-     "0 3 * * 0    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"
-     "0 15 * * 5   root    /run/current-system/sw/bin/bash /etc/nixos/backup-reminder.sh"
+    "0 2 * * *    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:repair"
+    "5 2 * * 0    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-db"
+    "10 2 * * 0   root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-js"
+    "0 3 * * 0    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"
+    #"0 15 * * 5   root    /run/current-system/sw/bin/bash /etc/nixos/backup-reminder.sh" #will be added in the future
   ];
   
   ########## SSH & Security ##########
