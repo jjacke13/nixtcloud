@@ -1,10 +1,12 @@
 { config, lib, pkgs, ... }:
 let
   name = "nixtcloud";
+  #occ = "/run/current-system/sw/bin/nextcloud-occ"
 in
 {
   imports =
     [ ./nextcloud.nix
+      ./first-boot.nix
     ];
 
   networking.hostName = name; 
@@ -70,7 +72,7 @@ in
   #users.users.admin.openssh.authorizedKeys.keys = [ "your key here"];
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 22 80 ];
+    allowedTCPPorts = [ 22 80 443 ];
     ## We add the following to firewall so Nixtcloud can be accessed with Holesail not only remotely, but also from the local network
     extraCommands = ''
       # Allow connections from common home network IP ranges
@@ -106,11 +108,8 @@ in
     path = [ pkgs.coreutils pkgs.qrencode pkgs.openssl ];
     script = ''
           /run/current-system/sw/bin/nextcloud-occ app:enable files_external
-          /run/current-system/sw/bin/nextcloud-occ app:enable contacts
-          /run/current-system/sw/bin/nextcloud-occ app:enable calendar
-          /run/current-system/sw/bin/nextcloud-occ app:enable notes
+          /run/current-system/sw/bin/nextcloud-occ app:disable files_trashbin
           /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup
-          /run/current-system/sw/bin/nextcloud-occ app:disable music 
           if [ ! -d /mnt/Public ]; then
               mkdir -p /mnt/Public
               chown -R nextcloud:nextcloud /mnt/Public
@@ -162,6 +161,7 @@ in
   #### The following service enables Holesail to do its magic ####
   services.holesail-server.p2pmagic = {
   	enable = true;
+    host = "localhost";
   	port = 80;
   	key-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
   };
@@ -170,6 +170,7 @@ in
   ### The following service enables the share of the Public folder with Holesail ###
   services.holesail-filemanager.p2public = {
   	enable = true;
+    host = "localhost";
   	key-file = "/mnt/Public/public.txt";
     path = "/mnt/Public";
     username = "test";
