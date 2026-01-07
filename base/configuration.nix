@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 let
   name = "nixtcloud";
-  #occ = "/run/current-system/sw/bin/nextcloud-occ"
 in
 {
   imports =
