@@ -28,6 +28,7 @@
           /run/current-system/sw/bin/nextcloud-occ app:enable contacts
           /run/current-system/sw/bin/nextcloud-occ app:enable calendar
           /run/current-system/sw/bin/nextcloud-occ app:enable notes
+          /run/current-system/sw/bin/nextcloud-occ app:disable photos
           /run/current-system/sw/bin/nextcloud-occ app:disable files_trashbin
           /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup
 
