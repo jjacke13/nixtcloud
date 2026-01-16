@@ -34,8 +34,9 @@ in
 
   ######################################## Size reduction options ########################################
   programs.command-not-found.enable = false;
-  i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
+  i18n.supportedLocales = lib.mkForce [ "en_US.UTF-8/UTF-8" ];
   environment.defaultPackages = lib.mkForce [];
+  environment.stub-ld.enable = false;
   boot.supportedFilesystems = lib.mkForce [ "vfat" "ext4" "exfat" "ntfs3" ];
   systemd = {
     coredump.enable = false;
@@ -51,6 +52,14 @@ in
     info.enable = false;
     doc.enable = false;
     nixos.enable = false;
+  };
+  services.logrotate.enable = false;
+  services.udisks2.enable = false;
+  xdg = {
+    autostart.enable = false;
+    icons.enable = false;
+    mime.enable = false;
+    sounds.enable = false;
   };
   #######################################################################################################
 
