@@ -5,6 +5,8 @@
 {
   
   hardware.enableAllHardware = lib.mkForce false;
+  hardware.enableRedistributableFirmware = lib.mkForce false;
+  hardware.firmware = [ pkgs.raspberrypiWirelessFirmware ];
   boot.supportedFilesystems.zfs = lib.mkForce false;
   security.rtkit.enable = true;
 
