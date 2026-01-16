@@ -37,4 +37,11 @@
     fsType = "tmpfs";
     options = [ "mode=0700" "size=10M" ];
   };
+
+  # Disable Redis persistence (RAM-only) to reduce SD card writes
+  # Data is transient (sessions, cache, locks) - no real data loss on reboot
+  services.redis.servers.nextcloud.settings = {
+    save = [];
+    appendonly = "no";
+  };
 }
