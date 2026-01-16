@@ -13,7 +13,7 @@ in
   #### You can define your wireless network here if you don't want to use ethernet cable.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   #networking.wireless.networks = { SSID = { psk = "pass"; };  };
-  
+
   # Set your time zone.
   time.timeZone = "auto";
   
@@ -30,10 +30,30 @@ in
 	  dates = "weekly";
 	  options = "--delete-older-than 5d";
   };
-  documentation.enable = false;
-  documentation.nixos.enable = false;
   ##########################################################################################
- 
+
+  ######################################## Size reduction options ########################################
+  programs.command-not-found.enable = false;
+  i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
+  environment.defaultPackages = lib.mkForce [];
+  boot.supportedFilesystems = lib.mkForce [ "vfat" "ext4" "exfat" "ntfs3" ];
+  systemd = {
+    coredump.enable = false;
+    enableEmergencyMode = false;
+  };
+  security.audit.enable = false;
+  security.auditd.enable = false;
+  boot.plymouth.enable = false;
+  zramSwap.enable = false;
+  documentation = {
+    enable = false;
+    man.enable = false;
+    info.enable = false;
+    doc.enable = false;
+    nixos.enable = false;
+  };
+  #######################################################################################################
+
   ### DO NOT CHANGE the username. After the system is installed, you can change the password with 'passwd' command.
    users.users.admin = {
      isNormalUser = true;
