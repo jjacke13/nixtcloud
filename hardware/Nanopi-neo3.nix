@@ -3,6 +3,21 @@
 { config, lib, pkgs, ... }:
 
 let
+  # Pinned kernel version
+  kernelVersion = "6.18.3";
+  kernelSrc = pkgs.fetchurl {
+    url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${kernelVersion}.tar.xz";
+    hash = "sha256-eoh5FnuJxLrgd9bznE8hMHafBdva0qrZFK2rmvt9f5o=";
+  };
+
+  customKernel = pkgs.linuxManualConfig {
+    version = kernelVersion;
+    modDirVersion = kernelVersion;
+    src = kernelSrc;
+    configfile = ./kernel-rk3328-minimal.config;
+    allowImportFromDerivation = true;
+  };
+
   # U-Boot for NanoPi Neo3 (uses R2S config - identical hardware)
   ubootNanoPiNeo3 = pkgs.buildUBoot {
     defconfig = "nanopi-r2s-rk3328_defconfig";
@@ -11,10 +26,10 @@ let
     filesToInstall = [ "idbloader.img" "u-boot.itb" ];
   };
 
-  # Filtered DTB package - includes only R2S DTB (reduces /boot size)
+  # Filtered DTB package - uses pinned custom kernel (reduces /boot size)
   filteredDtbs = pkgs.stdenv.mkDerivation {
     name = "filtered-dtbs-nanopi-neo3";
-    src = pkgs.linuxPackages_latest.kernel;
+    src = customKernel;
     dontBuild = true;
     installPhase = ''
       mkdir -p $out/rockchip
@@ -24,20 +39,7 @@ let
 in
 {
   boot = {
-    kernelPackages = let
-      kernelVersion = "6.18.3";
-      kernelSrc = pkgs.fetchurl {
-        url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${kernelVersion}.tar.xz";
-        hash = "sha256-eoh5FnuJxLrgd9bznE8hMHafBdva0qrZFK2rmvt9f5o=";
-      };
-      customKernel = pkgs.linuxManualConfig {
-        version = kernelVersion;
-        modDirVersion = kernelVersion;
-        src = kernelSrc;
-        configfile = ./kernel-rk3328-minimal.config;
-        allowImportFromDerivation = true;
-      };
-    in pkgs.linuxPackagesFor customKernel;
+    kernelPackages = pkgs.linuxPackagesFor customKernel;
 
     initrd = {
       includeDefaultModules = false;
