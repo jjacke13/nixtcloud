@@ -25,6 +25,40 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2
 }
 
+# Database configuration
+readonly USB_DB="/var/lib/nextcloud/usb_storage_map.txt"
+
+# Look up storage info by UUID
+# Returns: mount_id|mount_path|label (or empty if not found)
+db_lookup_by_uuid() {
+    local uuid="$1"
+    grep "^${uuid}|" "$USB_DB" 2>/dev/null | tail -n1 | cut -d'|' -f2-
+}
+
+# Add new entry to database
+# Usage: db_add_entry UUID mount_id mount_path label
+db_add_entry() {
+    local uuid="$1"
+    local mount_id="$2"
+    local mount_path="$3"
+    local label="$4"
+
+    echo "${uuid}|${mount_id}|${mount_path}|${label}" >> "$USB_DB"
+    log "Added to DB: UUID=${uuid} mount_id=${mount_id} path=${mount_path}"
+}
+
+# Get mount_id from database by UUID
+db_get_mount_id() {
+    local uuid="$1"
+    db_lookup_by_uuid "$uuid" | cut -d'|' -f1
+}
+
+# Get mount_path from database by UUID
+db_get_mount_path() {
+    local uuid="$1"
+    db_lookup_by_uuid "$uuid" | cut -d'|' -f2
+}
+
 # Clean up Nextcloud external storage entries for devices that are no longer mounted
 # This handles both properly unmounted devices and stale mounts from unplugged devices
 cleanup_unmounted_storage() {
@@ -65,10 +99,10 @@ cleanup_unmounted_storage() {
             local storage_id
             storage_id=$("$NEXTCLOUD_OCC" files_external:list | grep "$folder_name" | awk '{print $2}' || true)
             
-            # Remove the external storage entry if it exists
+            # Hide the external storage entry if it exists (preserve for preview reuse)
             if [[ -n "$storage_id" ]]; then
-                log "Removing external storage ID: $storage_id"
-                "$NEXTCLOUD_OCC" files_external:delete -y "$storage_id"
+                log "Hiding external storage ID: $storage_id (adding to disabled-storage group)"
+                "$NEXTCLOUD_OCC" files_external:applicable "$storage_id" --add-group=disabled-storage
             fi
             
             # Remove the empty mount point directory to prevent future conflicts
@@ -128,16 +162,41 @@ get_mount_type() {
     esac
 }
 
-# Mount a USB device and create corresponding Nextcloud external storage
+# Mount a USB device and create/reuse corresponding Nextcloud external storage
 mount_device() {
     local device="$1"    # Device path (e.g., /dev/sda1)
     local fs_type="$2"   # Filesystem type (e.g., vfat, ext4)
     local label="$3"     # Device label or basename
-    
+
+    # Get device UUID for tracking
+    local device_uuid
+    device_uuid=$(blkid -s UUID -o value "$device" 2>/dev/null || true)
+
+    if [[ -z "$device_uuid" ]]; then
+        log "Warning: Device $device has no UUID, skipping"
+        return 1
+    fi
+
+    # Check if this UUID is already in our database
+    local existing_mount_id
+    existing_mount_id=$(db_get_mount_id "$device_uuid")
+
+    local mount_point
+
+    if [[ -n "$existing_mount_id" ]]; then
+        # Known device - reuse existing storage entry and mount path
+        mount_point=$(db_get_mount_path "$device_uuid")
+        log "Recognized USB device (UUID: $device_uuid, mount_id: $existing_mount_id)"
+        log "Will mount at previous location: $mount_point"
+    else
+        # New device - find available mount point (handles label conflicts)
+        mount_point=$(get_available_mount_path "$device_uuid" "$label")
+        log "New USB device detected (UUID: $device_uuid)"
+    fi
+
     # Create mount point directory
-    local mount_point="$MOUNT_DIR/$label"
     mkdir -p "$mount_point"
-    
+
     # Get filesystem-specific mount options
     local mount_opts
     mount_opts=$(get_mount_options "$fs_type")
@@ -145,22 +204,22 @@ mount_device() {
         log "Unsupported filesystem type: $fs_type for $device"
         return 1
     fi
-    
+
     # Build mount command with appropriate type and options
     local mount_type
     mount_type=$(get_mount_type "$fs_type")
-    
+
     local mount_cmd="mount"
     [[ -n "$mount_type" ]] && mount_cmd+=" -t $mount_type"
     mount_cmd+=" -o $mount_opts $device \"$mount_point\""
-    
+
     log "Mounting $device ($fs_type) at $mount_point"
     if eval "$mount_cmd"; then
         # For Linux filesystems, set ownership after mounting
         if [[ "$fs_type" =~ ^ext[234]$ ]]; then
             chown -R "$NEXTCLOUD_USER:$NEXTCLOUD_USER" "$mount_point"
         fi
-        
+
         # NTFS sometimes needs time to settle and fix ownership
         if [[ "$fs_type" == "ntfs" ]]; then
             sleep 15
@@ -169,11 +228,41 @@ mount_device() {
             # Set secure permissions on mount point directory for Nextcloud admin UI
             chmod 755 "$mount_point"
         fi
-        
+
         log "Successfully mounted $device"
-        # Create Nextcloud external storage entry
-        log "Creating external storage entry for /$label"
-        "$NEXTCLOUD_OCC" files_external:create "/$label" local null::null -c datadir="$mount_point"
+
+        # Handle Nextcloud external storage
+        if [[ -n "$existing_mount_id" ]]; then
+            # Reuse existing storage - just unhide it
+            log "Re-enabling existing external storage (mount_id: $existing_mount_id)"
+            "$NEXTCLOUD_OCC" files_external:applicable "$existing_mount_id" --remove-group=disabled-storage
+
+            # Extract folder name from mount_point for scan path
+            local folder_name="$(basename "$mount_point")"
+
+            # Trigger file scan to refresh cache and detect any changes
+            log "Scanning files in external storage: /$folder_name"
+            "$NEXTCLOUD_OCC" files:scan --path="/admin/files/$folder_name" &
+            # Run in background (&) so mounting continues without waiting for scan
+        else
+            # Create new external storage entry
+            # Extract folder name from mount_point (includes conflict suffix if needed)
+            local folder_name="$(basename "$mount_point")"
+            log "Creating new external storage entry for /$folder_name"
+            "$NEXTCLOUD_OCC" files_external:create "/$folder_name" local null::null -c datadir="$mount_point"
+
+            # Get the mount_id that was just created
+            local new_mount_id
+            new_mount_id=$("$NEXTCLOUD_OCC" files_external:list | grep "/$folder_name" | awk '{print $2}' || true)
+
+            if [[ -n "$new_mount_id" ]]; then
+                # Add to database for future reuse
+                db_add_entry "$device_uuid" "$new_mount_id" "$mount_point" "$label"
+            else
+                log "Warning: Could not retrieve mount_id for newly created storage"
+            fi
+        fi
+
         return 0
     else
         log "Failed to mount $device"
@@ -183,24 +272,60 @@ mount_device() {
     fi
 }
 
+# Find an available mount path, handling label conflicts
+# Usage: get_available_mount_path device_uuid label
+get_available_mount_path() {
+    local device_uuid="$1"
+    local label="$2"
+    local base_path="$MOUNT_DIR/$label"
+    local candidate_path="$base_path"
+    local counter=2
+
+    # Check if path is already used by a DIFFERENT UUID in database
+    while true; do
+        # Look up what UUID owns this path in database
+        local existing_uuid
+        existing_uuid=$(grep "|${candidate_path}|" "$USB_DB" 2>/dev/null | cut -d'|' -f1 || true)
+
+        if [[ -z "$existing_uuid" ]]; then
+            # Path not in database - available!
+            echo "$candidate_path"
+            return 0
+        elif [[ "$existing_uuid" == "$device_uuid" ]]; then
+            # Path owned by same UUID - our device!
+            echo "$candidate_path"
+            return 0
+        else
+            # Path owned by different UUID - try next
+            candidate_path="${base_path}_${counter}"
+            ((counter++))
+        fi
+    done
+}
+
 # Get a unique label for a device to prevent mount point conflicts
-# Uses filesystem label + device name to ensure uniqueness
+# Uses filesystem label only (UUID tracking ensures uniqueness)
 get_device_label() {
     local device="$1"
     local fs_label
-    local device_name
-    
+
     # Get filesystem label if it exists
     fs_label=$(blkid -o value -s LABEL "$device" 2>/dev/null || true)
-    # Get device basename (e.g., "sda1")
-    device_name=$(basename "$device")
-    
+
     if [[ -n "$fs_label" ]]; then
-        # Use label_devicename format to ensure uniqueness
-        echo "${fs_label}_${device_name}"
+        # Use filesystem label only (UUID tracking ensures uniqueness)
+        echo "$fs_label"
     else
-        # No label, just use device name
-        echo "$device_name"
+        # No label - use UUID as fallback for mount point name
+        local device_uuid
+        device_uuid=$(blkid -s UUID -o value "$device" 2>/dev/null || true)
+        if [[ -n "$device_uuid" ]]; then
+            # Use first 8 chars of UUID for readability
+            echo "usb-${device_uuid:0:8}"
+        else
+            # Last resort - use device name
+            echo "$(basename "$device")"
+        fi
     fi
 }
 
