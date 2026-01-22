@@ -28,11 +28,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1763732818,
-        "narHash": "sha256-1XWVd4AA/v3G/6Z4eJF+TQL9aty0/0QG85OY3q3v3s8=",
+        "lastModified": 1766672524,
+        "narHash": "sha256-UvI/9cXABsDsJRxU1NFjcZBXLiXQvQThknGBbR8500E=",
         "owner": "jjacke13",
         "repo": "holesail-nix",
-        "rev": "027ba9e5cd4f516175e7eb864b83274e5dcea45a",
+        "rev": "6b7a20488c5ac0a59363be75e21642b9b332ba6e",
         "type": "github"
       },
       "original": {
@@ -94,16 +94,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1763334038,
-        "narHash": "sha256-LBVOyaH6NFzQ3X/c6vfMZ9k4SV2ofhpxeL9YnhHNJQQ=",
+        "lastModified": 1766201043,
+        "narHash": "sha256-eplAP+rorKKd0gNjV3rA6+0WMzb1X1i16F5m5pASnjA=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "4c8cdd5b1a630e8f72c9dd9bf582b1afb3127d2c",
+        "rev": "b3aad468604d3e488d627c0b43984eb60e75e782",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixos-25.05",
+        "ref": "nixos-25.11",
         "repo": "nixpkgs",
         "type": "github"
       }
