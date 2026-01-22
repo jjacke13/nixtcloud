@@ -9,6 +9,7 @@
   hardware.firmware = [ pkgs.raspberrypiWirelessFirmware ];
   boot.supportedFilesystems.zfs = lib.mkForce false;
   security.rtkit.enable = true;
+  sdImage.compressImage = false;
 
   boot.kernelModules = [ "ntfs3" ];
   
