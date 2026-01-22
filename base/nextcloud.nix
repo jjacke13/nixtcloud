@@ -1,10 +1,11 @@
 { config, lib, pkgs, ... }:
 let
     name = "nixtcloud";
+    sslCertDir = "/var/lib/nixtcloud/ssl";
 in
 {
   #### Defining the admin password file. This file is used to set the admin password for the nextcloud instance. ####
-  environment.etc."nixos/adminpass.txt" = { 
+  environment.etc."nixos/adminpass.txt" = {
     text = ''admin'';
     mode = "0644";
     group = "wheel";
@@ -16,35 +17,78 @@ in
         hostName = name;
         database.createLocally = true;
         config = {
-                dbtype = "pgsql";
-                adminuser = "admin";
-                adminpassFile = "/etc/nixos/adminpass.txt";
+          dbtype = "sqlite";
+          adminuser = "admin";
+          adminpassFile = "/etc/nixos/adminpass.txt";
         };
         settings = {
-                trusted_domains = [ "${name}.local" "192.168.*.*" ];
-                default_phone_region = "GR"; ### you can change this to your country code
-                log_type = "file";
+          trusted_domains = [ "localhost" "${name}.local" "192.168.*.*" ];
+          default_phone_region = "GR"; ### you can change this to your country code
+          log_type = "file";
 	        loglevel = 4;
-	        nginx.recommendedHttpHeaders =  true;
-	        nginx.hstsMaxAge = 15553000000;
 	        maintenance_window_start = 1;
           quota_include_external_storage = true;
+          overwriteprotocol = "https";
+          overwritecondaddr = "^192\\.168\\..*$";
+
+          # Preview optimization for faster mobile app and reduced RAM usage
+          "preview_max_x" = 1024;
+          "preview_max_y" = 1024;
+          "preview_max_filesize_image" = 30;  # MB - don't generate previews for images larger than this
+          "enable_previews" = true;
+          "enabledPreviewProviders" = [
+            "OC\\Preview\\PNG"
+            "OC\\Preview\\JPEG"
+            "OC\\Preview\\GIF"
+          ];
+
+          "metadata_max_filesize" = 128;  # MB - metadata extraction limit (default: 256)
+          "max_filesize_animated_gifs_public_sharing" = 5;  # MB (default: 10)
         };
         maxUploadSize = "5000M";
         appstoreEnable = true;
-        extraAppsEnable = true;
+        autoUpdateApps.enable = true;
+        extraAppsEnable = false; #we use Nextcloud's appstore
         configureRedis = true;
         caching.apcu = true;
         caching.redis = true;
         caching.memcached = false;
-        phpOptions = {  		
-                "opcache.fast_shutdown" = "1";
-  		          "opcache.interned_strings_buffer" = "10";
-  		          "opcache.max_accelerated_files" = "10000";
-  		          "opcache.memory_consumption" = "128";
-  		          "opcache.revalidate_freq" = "1";
-  		          output_buffering = "0";
-  		          short_open_tag = "Off"; };
+        phpOptions = {
+  		    "opcache.interned_strings_buffer" = "10"; # Increase from default 8
+        };
   };
-  
+
+  # Map to detect HTTPS based on port
+  services.nginx.appendHttpConfig = ''
+    map $server_port $fastcgi_https {
+      default off;
+      443 on;
+    }
+  '';
+
+  # Configure Nextcloud nginx virtualHost for dual-port access
+  # Port 8080: HTTP for localhost (P2P tunnel access)
+  # Port 443: HTTPS for nixtcloud.local (local network access)
+  services.nginx.virtualHosts.nixtcloud = {
+    listen = lib.mkForce [
+      { addr = "0.0.0.0"; port = 8080; ssl = false; }
+      { addr = "0.0.0.0"; port = 443; ssl = true; }
+    ];
+    # Directly inject SSL certificate directives and HSTS header
+    extraConfig = ''
+      ssl_certificate ${sslCertDir}/cert.pem;
+      ssl_certificate_key ${sslCertDir}/key.pem;
+      add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
+    '';
+  };
+
+  # HTTP to HTTPS redirect for nixtcloud.local only
+  services.nginx.virtualHosts."${name}-redirect" = {
+    serverName = "${name}.local";
+    listen = [
+      { addr = "0.0.0.0"; port = 80; ssl = false; }
+    ];
+    locations."/".return = "302 https://${name}.local$request_uri";
+  };
+
 }

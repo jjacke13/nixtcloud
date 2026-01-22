@@ -5,10 +5,13 @@
 {
   
   hardware.enableAllHardware = lib.mkForce false;
+  hardware.enableRedistributableFirmware = lib.mkForce false;
+  hardware.firmware = [ pkgs.raspberrypiWirelessFirmware ];
   boot.supportedFilesystems.zfs = lib.mkForce false;
   boot.kernelModules = [ "ntfs3" ];
-  
+
   security.rtkit.enable = true;
+  sdImage.compressImage = false;
   
   fileSystems."/" =
     { device = "/dev/disk/by-label/NIXOS_SD";
@@ -18,11 +21,18 @@
   
   networking.hostId = lib.mkForce null;
   networking.useDHCP = lib.mkDefault true;
-  nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
-
+  nixpkgs.hostPlatform = "aarch64-linux";
+  
   environment.etc."nixos/device.txt" = { 
     text = ''Rpi4'';
     mode = "0644";
     group = "wheel";
   };
+
+  ######## SD-card longevity options #########
+  imports =
+    [ ./sd-card-friendly.nix
+    ];
+  ############################################
+
 }

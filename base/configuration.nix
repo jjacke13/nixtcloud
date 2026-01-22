@@ -5,13 +5,14 @@ in
 {
   imports =
     [ ./nextcloud.nix
+      ./first-boot.nix
     ];
 
   networking.hostName = name; 
   
   #### You can define your wireless network here if you don't want to use ethernet cable.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  #networking.wireless.networks = { SSID = { psk = "pass"; };  };   
+  #networking.wireless.networks = { SSID = { psk = "pass"; };  };
 
   # Set your time zone.
   time.timeZone = "auto";
@@ -19,9 +20,10 @@ in
   ########## Most probably you don't need and don't want to change the nix settings below #########
   nix.settings = {
 	  experimental-features = "nix-command flakes";
-	  auto-optimise-store = true;
+	  auto-optimise-store = false; #fewer writes to sd-card
     substituters = [ "https://nix-community.cachix.org" ];
 	  trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
+    require-sigs = false;
   };
   nix.gc = {
 	  automatic = true;
@@ -29,7 +31,38 @@ in
 	  options = "--delete-older-than 5d";
   };
   ##########################################################################################
- 
+
+  ######################################## Size reduction options ########################################
+  programs.command-not-found.enable = false;
+  i18n.supportedLocales = lib.mkForce [ "en_US.UTF-8/UTF-8" ];
+  environment.defaultPackages = lib.mkForce [];
+  environment.stub-ld.enable = false;
+  boot.supportedFilesystems = lib.mkForce [ "vfat" "ext4" "exfat" "ntfs3" ];
+  systemd = {
+    coredump.enable = false;
+    enableEmergencyMode = false;
+  };
+  security.audit.enable = false;
+  security.auditd.enable = false;
+  boot.plymouth.enable = false;
+  zramSwap.enable = false;
+  documentation = {
+    enable = false;
+    man.enable = false;
+    info.enable = false;
+    doc.enable = false;
+    nixos.enable = false;
+  };
+  services.logrotate.enable = false;
+  services.udisks2.enable = false;
+  xdg = {
+    autostart.enable = false;
+    icons.enable = false;
+    mime.enable = false;
+    sounds.enable = false;
+  };
+  #######################################################################################################
+
   ### DO NOT CHANGE the username. After the system is installed, you can change the password with 'passwd' command.
    users.users.admin = {
      isNormalUser = true;
@@ -49,13 +82,16 @@ in
       pkgs.nssmdns
   ];  
 
-  ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
-  ### I added this because I think it is good to reboot once a day to keep the system healthy.
-  #Plus, every Sunday at 3AM we check and apply any updates
+  ### Optional daily reboot and periodic nextcloud maintenance
+  ### Weekly check and apply of updates
   services.cron.enable = true;
   services.cron.systemCronJobs = [
     #"0 2 * * *    root    /run/current-system/sw/bin/reboot"
-     "0 3 * * 0    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"
+    "0 2 * * *    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:repair"
+    "5 2 * * 0    root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-db"
+    "10 2 * * 0   root    sudo -u nextcloud /run/current-system/sw/bin/nextcloud-occ maintenance:mimetype:update-js"
+    "0 3 * * 0    root    /run/current-system/sw/bin/bash /etc/nixos/updater.sh"
+    #"0 15 * * 5   root    /run/current-system/sw/bin/bash /etc/nixos/backup-reminder.sh" #will be added in the future
   ];
   
   ########## SSH & Security ##########
@@ -64,7 +100,12 @@ in
   #users.users.admin.openssh.authorizedKeys.keys = [ "your key here"];
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 22 80 ];
+    allowedTCPPorts = [ 22 80 443 ];
+    ## We add the following to firewall so Nixtcloud can be accessed with Holesail not only remotely, but also from the local network
+    extraCommands = ''
+      # Allow connections from common home network IP ranges
+      iptables -A nixos-fw -s 192.168.0.0/16 -j nixos-fw-accept
+    '';
   };  
   #####################################
   
@@ -92,17 +133,12 @@ in
     wantedBy = [ "multi-user.target" ];
     after = ["network.target" "nextcloud-setup.service"];
     enable = true;
-    path = [ pkgs.coreutils pkgs.qrencode pkgs.pwgen ];
+    path = [ pkgs.coreutils pkgs.qrencode pkgs.openssl ];
     script = ''
           /run/current-system/sw/bin/nextcloud-occ app:enable files_external
-          if [ ! -d /mnt/Public ]; then
-              mkdir -p /mnt/Public
-              chown -R nextcloud:nextcloud /mnt/Public
-          fi      
-		      storages=$(/run/current-system/sw/bin/nextcloud-occ files_external:list | /run/current-system/sw/bin/awk '/[0-9]+/ {print $2}')
-		      for i in $storages; do
-    			    /run/current-system/sw/bin/nextcloud-occ files_external:delete -y $i
-		      done
+          /run/current-system/sw/bin/nextcloud-occ app:disable files_trashbin
+          /run/current-system/sw/bin/nextcloud-occ config:app:set preview jpeg_quality --value="55"
+          /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup      
           if [ ! -f /var/lib/nextcloud/data/admin/files/rebooter.txt ]; then
               touch /var/lib/nextcloud/data/admin/files/rebooter.txt
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/rebooter.txt
@@ -110,7 +146,7 @@ in
           fi
           if [ ! -f /var/lib/nextcloud/data/admin/files/remote.txt ]; then
               touch /var/lib/nextcloud/data/admin/files/remote.txt
-              pwgen -1 -N 1 -s 35 | tr -d '\n' > /var/lib/nextcloud/data/admin/files/remote.txt
+              echo -n "hs://s000$(openssl rand -hex 32)" > /var/lib/nextcloud/data/admin/files/remote.txt
               qrencode -o /var/lib/nextcloud/data/admin/files/remote.jpg -r /var/lib/nextcloud/data/admin/files/remote.txt -s 10
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/remote.txt
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/remote.jpg
@@ -118,11 +154,10 @@ in
           fi
           if [ ! -f /mnt/Public/public.txt ]; then
               touch /mnt/Public/public.txt
-              pwgen -1 -N 1 -s 35 | tr -d '\n' > /mnt/Public/public.txt
+              echo -n "hs://s000$(openssl rand -hex 32)" > /mnt/Public/public.txt
               qrencode -o /mnt/Public/public.jpg -r /mnt/Public/public.txt -s 10
               chown -R nextcloud:nextcloud /mnt/Public
           fi
-          /run/current-system/sw/bin/nextcloud-occ files_external:create "/Public" local null::null -c datadir="/mnt/Public"
     '';
     serviceConfig.Type = "oneshot";
     before = ["mymnt.service" "p2pmagic.service" "p2public.service" "rebooter.service"];
@@ -130,35 +165,42 @@ in
   };  
   ############################################################################
 
-  ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.###### 
+  ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.######
   systemd.services.mymnt = {
     enable = true;
-    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs];
+    path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs ];
     serviceConfig = {
 		  Type = "simple";
 		  ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/mounter.sh";
 		  Restart = "always";
-		  RestartSec = "30";  
+		  RestartSec = "30";
+      KillMode = "process";
 	  };
   };
   ################################################################################
   
-  #### The following sevice enables Holesail to do its magic ####
+  #### The following service enables Holesail to do its magic ####
   services.holesail-server.p2pmagic = {
   	enable = true;
-  	port = 80;
-  	connector-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
+    host = "localhost";
+  	port = 8080;
+  	key-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
+    user = "nextcloud";
+    group = "nextcloud";
   };
   ###############################################################################
   
   ### The following service enables the share of the Public folder with Holesail ###
   services.holesail-filemanager.p2public = {
   	enable = true;
-  	connector-file = "/mnt/Public/public.txt";
-    path = "/mnt/Public";
+    host = "localhost";
+  	key-file = "/mnt/Public/public.txt";
+    directory = "/mnt/Public";
     username = "test";
     password = "test";
     role = "user";
+    user = "nextcloud";
+    group = "nextcloud";
   };
   ##############################################################################
   
@@ -186,12 +228,11 @@ in
     group = "wheel";
   };
 
-  environment.etc."nixos/updater.sh" = { 
+  environment.etc."nixos/updater.sh" = {
     source = ./updater.sh;
     mode = "0744";
     group = "wheel";
   };
-  
   ##############################################################################################################
 
 }

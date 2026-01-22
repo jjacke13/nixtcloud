@@ -1,5 +1,5 @@
 {
-  description = "A flake to produce sd-card images and nixos configurations running Nixtcloud for raspberry pi 4 and 5";
+  description = "A flake to produce sd-card images and nixos configurations running Nixtcloud for Raspberry Pi 4, 5, and NanoPi NEO3";
   
   #Nix-community cachix is needed if you want to build the image for raspberry pi 5. If you don't want to use it, 
   #the linux kernel will be built from source which takes a long time.
@@ -10,20 +10,20 @@
   };
   
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-    holesail.url = "github:jjacke13/holesail-nix";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    holesail.url = "github:jjacke13/holesail-nix/test";
     raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
   outputs = { self, nixpkgs, holesail, raspberry-pi-nix, nixos-hardware, ... }:
   {
-    nixosModules.state = { system.stateVersion = "24.11"; };
+    nixosModules.state = { system.stateVersion = "25.11"; };
 
     packages.aarch64-linux = {
       Rpi4 = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
-
       Rpi5 = self.nixosConfigurations.Rpi5.config.system.build.sdImage;
+      Nanopi-neo3 = self.nixosConfigurations.Nanopi-neo3.config.system.build.sdImage;
     };
     
     nixosConfigurations= {
@@ -47,6 +47,16 @@
           raspberry-pi-nix.nixosModules.sd-image 
           self.nixosModules.state
         ];      
+      };
+
+      Nanopi-neo3 = nixpkgs.lib.nixosSystem {
+        modules = [
+          holesail.nixosModules.aarch64-linux.holesail
+          ./base/configuration.nix
+          ./hardware/Nanopi-neo3.nix
+          "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+          self.nixosModules.state
+        ];
       };
     };
   };
