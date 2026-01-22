@@ -1,5 +1,8 @@
 { config, lib, pkgs, ... }:
 
+let
+  oc = "/run/current-system/sw/bin/nextcloud-occ";
+in
 {
   #### First boot initialization - runs only once ####
   systemd.services.first-boot = {
@@ -24,23 +27,34 @@
           chmod 644 /var/lib/nixtcloud/ssl/cert.pem
 
           # Enable/disable Nextcloud apps
-          /run/current-system/sw/bin/nextcloud-occ app:enable files_external
-          /run/current-system/sw/bin/nextcloud-occ app:enable contacts
-          /run/current-system/sw/bin/nextcloud-occ app:enable calendar
-          /run/current-system/sw/bin/nextcloud-occ app:enable notes
-          /run/current-system/sw/bin/nextcloud-occ app:disable photos
-          /run/current-system/sw/bin/nextcloud-occ app:disable files_trashbin
-          /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup
-          /run/current-system/sw/bin/nextcloud-occ app:disable app_api
-          /run/current-system/sw/bin/nextcloud-occ app:disable federation
-          /run/current-system/sw/bin/nextcloud-occ app:disable nextcloud_announcements
-          /run/current-system/sw/bin/nextcloud-occ app:disable updatenotification
-          /run/current-system/sw/bin/nextcloud-occ app:disable survey_client
+          ${oc} app:enable files_external
+          ${oc} app:enable contacts
+          ${oc} app:enable calendar
+          ${oc} app:enable notes
+          ${oc} app:disable photos
+          ${oc} app:disable files_trashbin
+          ${oc} app:disable nextbackup
+          ${oc} app:disable app_api
+          ${oc} app:disable federation
+          ${oc} app:disable nextcloud_announcements
+          ${oc} app:disable updatenotification
+          ${oc} app:disable survey_client
 
+          # Create disabled-storage group (for hiding unplugged USB drives)
+          ${oc} group:add disabled-storage
+
+          cat > /var/lib/nextcloud/usb_storage_map.txt <<'EOF'
+# USB Storage Mapping Database
+# Format: UUID|mount_id|mount_path|label
+# This file maps USB partition UUIDs to Nextcloud external storage entries
+EOF
+          chown nextcloud:nextcloud /var/lib/nextcloud/usb_storage_map.txt
+          chmod 644 /var/lib/nextcloud/usb_storage_map.txt
 
           # Create Public folder
           mkdir -p /mnt/Public
           chown -R nextcloud:nextcloud /mnt/Public
+          ${oc} files_external:create "/Public" local null::null -c datadir="/mnt/Public"
 
           # Mark first boot as complete
           touch /var/lib/first-boot-done
