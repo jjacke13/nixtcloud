@@ -82,8 +82,8 @@ in
       pkgs.nssmdns
   ];  
 
-  ### This part reboots the system every day at 2:00 AM. You can change the time if you want, or disable it entirely. 
-  ### I added this because I think it is good to reboot once a day to keep the system healthy.
+  ### Optional daily reboot and periodic nextcloud maintenance
+  ### Weekly check and apply of updates
   services.cron.enable = true;
   services.cron.systemCronJobs = [
     #"0 2 * * *    root    /run/current-system/sw/bin/reboot"
@@ -137,15 +137,8 @@ in
     script = ''
           /run/current-system/sw/bin/nextcloud-occ app:enable files_external
           /run/current-system/sw/bin/nextcloud-occ app:disable files_trashbin
-          /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup
-          if [ ! -d /mnt/Public ]; then
-              mkdir -p /mnt/Public
-              chown -R nextcloud:nextcloud /mnt/Public
-          fi      
-		      storages=$(/run/current-system/sw/bin/nextcloud-occ files_external:list | /run/current-system/sw/bin/awk '/[0-9]+/ {print $2}')
-		      for i in $storages; do
-    			    /run/current-system/sw/bin/nextcloud-occ files_external:delete -y $i
-		      done
+          /run/current-system/sw/bin/nextcloud-occ config:app:set preview jpeg_quality --value="55"
+          /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup      
           if [ ! -f /var/lib/nextcloud/data/admin/files/rebooter.txt ]; then
               touch /var/lib/nextcloud/data/admin/files/rebooter.txt
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/rebooter.txt
@@ -165,7 +158,6 @@ in
               qrencode -o /mnt/Public/public.jpg -r /mnt/Public/public.txt -s 10
               chown -R nextcloud:nextcloud /mnt/Public
           fi
-          /run/current-system/sw/bin/nextcloud-occ files_external:create "/Public" local null::null -c datadir="/mnt/Public"
     '';
     serviceConfig.Type = "oneshot";
     before = ["mymnt.service" "p2pmagic.service" "p2public.service" "rebooter.service"];
@@ -173,7 +165,7 @@ in
   };  
   ############################################################################
 
-  ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.###### 
+  ### The following service automounts external usb devices with correct permissions and creates the corresponding Nextcloud external storages.######
   systemd.services.mymnt = {
     enable = true;
     path = [ pkgs.util-linux pkgs.gawk pkgs.exfatprogs ];
@@ -182,6 +174,7 @@ in
 		  ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/mounter.sh";
 		  Restart = "always";
 		  RestartSec = "30";
+      KillMode = "process";
 	  };
   };
   ################################################################################
@@ -190,8 +183,10 @@ in
   services.holesail-server.p2pmagic = {
   	enable = true;
     host = "localhost";
-  	port = 80;
+  	port = 8080;
   	key-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
+    user = "nextcloud";
+    group = "nextcloud";
   };
   ###############################################################################
   
@@ -200,10 +195,12 @@ in
   	enable = true;
     host = "localhost";
   	key-file = "/mnt/Public/public.txt";
-    path = "/mnt/Public";
+    directory = "/mnt/Public";
     username = "test";
     password = "test";
     role = "user";
+    user = "nextcloud";
+    group = "nextcloud";
   };
   ##############################################################################
   
