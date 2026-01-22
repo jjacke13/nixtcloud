@@ -32,8 +32,6 @@
           /run/current-system/sw/bin/nextcloud-occ app:disable files_trashbin
           /run/current-system/sw/bin/nextcloud-occ app:disable nextbackup
           /run/current-system/sw/bin/nextcloud-occ app:disable app_api
-          /run/current-system/sw/bin/nextcloud-occ app:disable cloud_federation_api
-          /run/current-system/sw/bin/nextcloud-occ app:disable federatedfilesharing
           /run/current-system/sw/bin/nextcloud-occ app:disable federation
           /run/current-system/sw/bin/nextcloud-occ app:disable nextcloud_announcements
           /run/current-system/sw/bin/nextcloud-occ app:disable updatenotification
