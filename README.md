@@ -1,5 +1,3 @@
-# This is the test branch! All new changes are being tested here.
-
 # 🧊 Nixtcloud: Self-Hosted Cloud in One Command
 
 [![NixOS](https://img.shields.io/badge/NixOS-25.05-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
