@@ -2,7 +2,7 @@
 
 # 🧊 Nixtcloud: Self-Hosted Cloud in One Command
 
-[![NixOS](https://img.shields.io/badge/NixOS-25.05-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
+[![NixOS](https://img.shields.io/badge/NixOS-25.11-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
 [![Nextcloud](https://img.shields.io/badge/Nextcloud-32-orange.svg?style=flat-square&logo=nextcloud)](https://nextcloud.com)
 [![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-4%20%7C%205-c51a4a.svg?style=flat-square&logo=raspberry-pi)](https://www.raspberrypi.org)
 [![NanoPi NEO3](https://img.shields.io/badge/NanoPi-NEO3-green.svg?style=flat-square)](https://www.friendlyelec.com/index.php?route=product/product&product_id=279)
