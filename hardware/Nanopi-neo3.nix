@@ -102,6 +102,16 @@ in
     group = "wheel";
   };
 
+  # PHP-FPM worker optimization for 2GB RAM
+  services.nextcloud.poolSettings = lib.mkForce {
+    "pm" = "dynamic";
+    "pm.max_children" = "8";           # Max 8 workers (saves 200-400MB vs default 16)
+    "pm.start_servers" = "2";          # Start with 2 workers on boot
+    "pm.min_spare_servers" = "1";      # Keep at least 1 idle worker ready
+    "pm.max_spare_servers" = "3";      # Kill idle workers if more than 3 unused
+    "pm.max_requests" = "500";         # Restart worker after 500 requests (prevent leaks)
+  };
+
   ######## SD-card longevity options #########
   imports = [ ./sd-card-friendly.nix ];
   ############################################
