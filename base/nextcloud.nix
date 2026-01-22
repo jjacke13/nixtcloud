@@ -53,11 +53,11 @@ in
   '';
 
   # Configure Nextcloud nginx virtualHost for dual-port access
-  # Port 80: HTTP for localhost (P2P tunnel access)
+  # Port 8080: HTTP for localhost (P2P tunnel access)
   # Port 443: HTTPS for nixtcloud.local (local network access)
   services.nginx.virtualHosts.nixtcloud = {
     listen = lib.mkForce [
-      { addr = "0.0.0.0"; port = 80; ssl = false; }
+      { addr = "0.0.0.0"; port = 8080; ssl = false; }
       { addr = "0.0.0.0"; port = 443; ssl = true; }
     ];
     # Directly inject SSL certificate directives and HSTS header
