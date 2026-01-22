@@ -30,6 +30,20 @@ in
           quota_include_external_storage = true;
           overwriteprotocol = "https";
           overwritecondaddr = "^192\\.168\\..*$";
+
+          # Preview optimization for faster mobile app and reduced RAM usage
+          "preview_max_x" = 1024;
+          "preview_max_y" = 1024;
+          "preview_max_filesize_image" = 30;  # MB - don't generate previews for images larger than this
+          "enable_previews" = true;
+          "enabledPreviewProviders" = [
+            "OC\\Preview\\PNG"
+            "OC\\Preview\\JPEG"
+            "OC\\Preview\\GIF"
+          ];
+
+          "metadata_max_filesize" = 128;  # MB - metadata extraction limit (default: 256)
+          "max_filesize_animated_gifs_public_sharing" = 5;  # MB (default: 10)
         };
         maxUploadSize = "5000M";
         appstoreEnable = true;
