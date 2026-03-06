@@ -1,0 +1,73 @@
+name: Build NAR Releases
+on:
+  push:
+    branches: [test]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+          - name: Rpi4
+          - name: Rpi5
+          - name: Nanopi-neo3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          extra_nix_config: |
+            substituters = https://nix-community.cachix.org https://cache.nixos.org
+            trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+
+      - name: Setup nixbuild.net SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.NIXBUILD_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan eu.nixbuild.net >> ~/.ssh/known_hosts
+
+      - name: Build toplevel
+        run: |
+          nix build \
+            --eval-store auto \
+            --store ssh-ng://eu.nixbuild.net \
+            .#nixosConfigurations.${{ matrix.config.name }}.config.system.build.toplevel
+
+      - name: Export closure to NAR
+        run: |
+          TOPLEVEL=$(nix path-info .#nixosConfigurations.${{ matrix.config.name }}.config.system.build.toplevel)
+          nix-store --export $(nix-store --query --requisites $TOPLEVEL) | gzip > ${{ matrix.config.name }}.nar.gz
+
+      - name: Upload NAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.config.name }}.nar.gz
+          path: ${{ matrix.config.name }}.nar.gz
+          retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./nars
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create \
+            "v$(date +%Y%m%d-%H%M%S)" \
+            --title "Nixtcloud Testing Build $(date +%Y-%m-%d)" \
+            --notes "Automated build from test branch" \
+            --prerelease \
+            --target test \
+            ./nars/Rpi4.nar.gz/Rpi4.nar.gz \
+            ./nars/Rpi5.nar.gz/Rpi5.nar.gz \
+            ./nars/Nanopi-neo3.nar.gz/Nanopi-neo3.nar.gz
