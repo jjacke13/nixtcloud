@@ -23,12 +23,12 @@ jobs:
             substituters = https://nix-community.cachix.org https://cache.nixos.org
             trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
 
-      - name: Setup nixbuild.net SSH key
+      - name: Setup nixbuild.net SSH
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.NIXBUILD_SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "eu.nixbuild.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIQCZc54poJ8vqawd8TraNryQeJnvH1eLpIDgbiqymM" >> ~/.ssh/known_hosts
+          echo "${{ secrets.NIXBUILD_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -t ed25519 eu.nixbuild.net > ~/.ssh/known_hosts
 
       - name: Build toplevel
         run: |
