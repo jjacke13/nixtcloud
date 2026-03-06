@@ -26,9 +26,9 @@ jobs:
       - name: Setup nixbuild.net SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.NIXBUILD_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.NIXBUILD_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan eu.nixbuild.net >> ~/.ssh/known_hosts
+          ssh-keyscan eu.nixbuild.net >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Build toplevel
         run: |
