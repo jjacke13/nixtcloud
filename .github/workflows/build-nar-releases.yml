@@ -1,7 +1,7 @@
 name: Build NAR Releases
 on:
-  push:
-    branches: [test]
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -91,23 +91,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./nars
 
-      - name: Create release
+      - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create \
-            "v$(date +%Y%m%d-%H%M%S)" \
-            --title "Nixtcloud Testing Build $(date +%Y-%m-%d)" \
-            --notes "Automated build from test branch" \
-            --prerelease \
-            --target test \
-            ./nars/*/*.nar.gz \
-            ./nars/*/*.img.gz
+          gh release upload ${{ github.event.release.tag_name }} ./nars/*/*.nar.gz ./nars/*/*.img.gz
