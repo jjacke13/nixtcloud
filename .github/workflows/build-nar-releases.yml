@@ -73,7 +73,8 @@ jobs:
         run: |
           OUTPUT=$(jq -r '.[0].outputs.out' build-result.json)
           nix copy --from ssh-ng://eu.nixbuild.net $OUTPUT
-          gzip -c $OUTPUT > ${{ matrix.name }}.img.gz
+          IMG=$(find $OUTPUT -name "*.img" | head -1)
+          gzip -c $IMG > ${{ matrix.name }}.img.gz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
