@@ -8,10 +8,25 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        config:
+        include:
           - name: Rpi4
+            type: toplevel
+            attr: .#nixosConfigurations.Rpi4.config.system.build.toplevel
           - name: Rpi5
+            type: toplevel
+            attr: .#nixosConfigurations.Rpi5.config.system.build.toplevel
           - name: Nanopi-neo3
+            type: toplevel
+            attr: .#nixosConfigurations.Nanopi-neo3.config.system.build.toplevel
+          - name: Rpi4
+            type: sdImage
+            attr: .#packages.aarch64-linux.Rpi4
+          - name: Rpi5
+            type: sdImage
+            attr: .#packages.aarch64-linux.Rpi5
+          - name: Nanopi-neo3
+            type: sdImage
+            attr: .#packages.aarch64-linux.Nanopi-neo3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,26 +53,37 @@ jobs:
           echo "${{ secrets.NIXBUILD_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-      - name: Build toplevel
+      - name: Build
         run: |
           nix build \
             --accept-flake-config \
             --eval-store auto \
             --store ssh-ng://eu.nixbuild.net \
             --json \
-            .#nixosConfigurations.${{ matrix.config.name }}.config.system.build.toplevel > build-result.json
+            ${{ matrix.attr }} > build-result.json
 
-      - name: Export closure to NAR
+      - name: Export closure to NAR (toplevel)
+        if: matrix.type == 'toplevel'
         run: |
           TOPLEVEL=$(jq -r '.[0].outputs.out' build-result.json)
-          nix-store --store ssh-ng://eu.nixbuild.net --export $(nix-store --store ssh-ng://eu.nixbuild.net --query --requisites $TOPLEVEL) | gzip > ${{ matrix.config.name }}.nar.gz
+          nix-store --store ssh-ng://eu.nixbuild.net --export $(nix-store --store ssh-ng://eu.nixbuild.net --query --requisites $TOPLEVEL) | gzip > ${{ matrix.name }}-toplevel.nar.gz
 
-      - name: Upload NAR artifact
+      - name: Copy and compress sdImage
+        if: matrix.type == 'sdImage'
+        run: |
+          OUTPUT=$(jq -r '.[0].outputs.out' build-result.json)
+          nix copy --from ssh-ng://eu.nixbuild.net $OUTPUT
+          gzip -c $OUTPUT > ${{ matrix.name }}.img.gz
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.config.name }}.nar.gz
-          path: ${{ matrix.config.name }}.nar.gz
+          name: ${{ matrix.name }}-${{ matrix.type }}
+          path: |
+            ${{ matrix.name }}-toplevel.nar.gz
+            ${{ matrix.name }}.img.gz
           retention-days: 1
+          if-no-files-found: ignore
 
   release:
     needs: build
@@ -83,6 +109,5 @@ jobs:
             --notes "Automated build from test branch" \
             --prerelease \
             --target test \
-            ./nars/Rpi4.nar.gz/Rpi4.nar.gz \
-            ./nars/Rpi5.nar.gz/Rpi5.nar.gz \
-            ./nars/Nanopi-neo3.nar.gz/Nanopi-neo3.nar.gz
+            ./nars/*/*.nar.gz \
+            ./nars/*/*.img.gz
