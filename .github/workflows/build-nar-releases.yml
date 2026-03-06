@@ -49,7 +49,7 @@ jobs:
       - name: Copy build output from nixbuild.net
         run: |
           TOPLEVEL=$(jq -r '.[0].outputs.out' build-result.json)
-          nix copy --accept-flake-config --from ssh-ng://eu.nixbuild.net $TOPLEVEL
+          nix copy --accept-flake-config --option require-sigs false --from ssh-ng://eu.nixbuild.net $TOPLEVEL
 
       - name: Export closure to NAR
         run: |
