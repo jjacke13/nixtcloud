@@ -33,6 +33,7 @@ jobs:
       - name: Build toplevel
         run: |
           nix build \
+            --accept-flake-config \
             --eval-store auto \
             --store ssh-ng://eu.nixbuild.net \
             .#nixosConfigurations.${{ matrix.config.name }}.config.system.build.toplevel
