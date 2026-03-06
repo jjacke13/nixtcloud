@@ -26,6 +26,13 @@ jobs:
       - name: Setup nixbuild.net SSH
         run: |
           mkdir -p ~/.ssh
+          cat >> ~/.ssh/config <<EOF
+          Host eu.nixbuild.net
+            PubkeyAcceptedKeyTypes ssh-ed25519
+            ServerAliveInterval 60
+            IPQoS throughput
+            IdentityFile ~/.ssh/id_ed25519
+          EOF
           echo "eu.nixbuild.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIQCZc54poJ8vqawd8TraNryQeJnvH1eLpIDgbiqymM" >> ~/.ssh/known_hosts
           echo "${{ secrets.NIXBUILD_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
