@@ -22,6 +22,7 @@ jobs:
           extra_nix_config: |
             substituters = https://nix-community.cachix.org https://cache.nixos.org
             trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+            require-sigs = false
 
       - name: Setup nixbuild.net SSH
         run: |
@@ -49,7 +50,7 @@ jobs:
       - name: Copy build output from nixbuild.net
         run: |
           TOPLEVEL=$(jq -r '.[0].outputs.out' build-result.json)
-          nix copy --accept-flake-config --option require-sigs false --from ssh-ng://eu.nixbuild.net $TOPLEVEL
+          nix copy --from ssh-ng://eu.nixbuild.net $TOPLEVEL
 
       - name: Export closure to NAR
         run: |
