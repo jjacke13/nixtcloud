@@ -77,6 +77,7 @@ in
   environment.systemPackages = [
       pkgs.curl
       pkgs.jq
+      pkgs.gzip
       pkgs.htop
       pkgs.avahi
       pkgs.nssmdns
