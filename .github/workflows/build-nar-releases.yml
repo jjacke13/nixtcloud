@@ -72,8 +72,8 @@ jobs:
         if: matrix.type == 'sdImage'
         run: |
           OUTPUT=$(jq -r '.[0].outputs.out' build-result.json)
-          IMG=$(nix store ls --store ssh-ng://eu.nixbuild.net --json $OUTPUT | jq -r '.[0].path')
-          nix store cat --store ssh-ng://eu.nixbuild.net $IMG | gzip > ${{ matrix.name }}.img.gz
+          IMG_REL=$(nix store ls --store ssh-ng://eu.nixbuild.net --recursive $OUTPUT | grep '\.img$' | awk '{print $NF}' | head -1)
+          nix store cat --store ssh-ng://eu.nixbuild.net "$OUTPUT/$IMG_REL" | gzip > ${{ matrix.name }}.img.gz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
