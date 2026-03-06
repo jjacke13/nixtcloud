@@ -43,11 +43,17 @@ jobs:
             --accept-flake-config \
             --eval-store auto \
             --store ssh-ng://eu.nixbuild.net \
-            .#nixosConfigurations.${{ matrix.config.name }}.config.system.build.toplevel
+            --json \
+            .#nixosConfigurations.${{ matrix.config.name }}.config.system.build.toplevel > build-result.json
+
+      - name: Copy build output from nixbuild.net
+        run: |
+          TOPLEVEL=$(jq -r '.[0].outputs.out' build-result.json)
+          nix copy --accept-flake-config --from ssh-ng://eu.nixbuild.net $TOPLEVEL
 
       - name: Export closure to NAR
         run: |
-          TOPLEVEL=$(nix path-info .#nixosConfigurations.${{ matrix.config.name }}.config.system.build.toplevel)
+          TOPLEVEL=$(jq -r '.[0].outputs.out' build-result.json)
           nix-store --export $(nix-store --query --requisites $TOPLEVEL) | gzip > ${{ matrix.config.name }}.nar.gz
 
       - name: Upload NAR artifact
