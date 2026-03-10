@@ -13,7 +13,7 @@ in
 
   services.nextcloud = {
         enable = true;
-        package = pkgs.nextcloud32;
+        package = pkgs.nextcloud33;
         hostName = name;
         database.createLocally = true;
         config = {
