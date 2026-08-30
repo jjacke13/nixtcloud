@@ -153,16 +153,10 @@ in
               chown nextcloud:nextcloud /var/lib/nextcloud/data/admin/files/remote.jpg
               /run/current-system/sw/bin/nextcloud-occ files:scan --path=/admin/files
           fi
-          if [ ! -f /mnt/Public/public.txt ]; then
-              touch /mnt/Public/public.txt
-              echo -n "hs://s000$(openssl rand -hex 32)" > /mnt/Public/public.txt
-              qrencode -o /mnt/Public/public.jpg -r /mnt/Public/public.txt -s 10
-              chown -R nextcloud:nextcloud /mnt/Public
-          fi
     '';
     serviceConfig.Type = "oneshot";
-    before = ["mymnt.service" "p2pmagic.service" "p2public.service" "rebooter.service"];
-    onSuccess = ["mymnt.service" "p2pmagic.service" "p2public.service" "rebooter.service"];
+    before = ["mymnt.service" "p2pmagic.service" "rebooter.service"];
+    onSuccess = ["mymnt.service" "p2pmagic.service" "rebooter.service"];
   };  
   ############################################################################
 
@@ -190,21 +184,7 @@ in
     group = "nextcloud";
   };
   ###############################################################################
-  
-  ### The following service enables the share of the Public folder with Holesail ###
-  services.holesail-filemanager.p2public = {
-  	enable = true;
-    host = "localhost";
-  	key-file = "/mnt/Public/public.txt";
-    directory = "/mnt/Public";
-    username = "test";
-    password = "test";
-    role = "user";
-    user = "nextcloud";
-    group = "nextcloud";
-  };
-  ##############################################################################
-  
+    
   ##### This service reboots the system if the rebooter.txt file gets deleted. On startup, it gets created again ####   
   systemd.services.rebooter = {
     description = "rebooter";

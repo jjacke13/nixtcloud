@@ -22,8 +22,6 @@
     # Run the p2pmagic tunnel on the C++ Holesail server: same connection
     # string, native backpressure, ~5x smaller closure than the Node build.
     # Set here because base/configuration.nix has no access to flake inputs.
-    # The p2public filemanager stays on Node - holesail-cpp has no
-    # --filemanager mode.
     nixosModules.cppServer = {
       services.holesail-server.p2pmagic.package =
         holesail.packages.aarch64-linux.holesail-cpp;

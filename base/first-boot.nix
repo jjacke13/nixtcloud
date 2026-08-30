@@ -51,11 +51,6 @@ EOF
           chown nextcloud:nextcloud /var/lib/nextcloud/usb_storage_map.txt
           chmod 644 /var/lib/nextcloud/usb_storage_map.txt
 
-          # Create Public folder
-          mkdir -p /mnt/Public
-          chown -R nextcloud:nextcloud /mnt/Public
-          ${oc} files_external:create "/Public" local null::null -c datadir="/mnt/Public"
-
           # Mark first boot as complete
           touch /var/lib/first-boot-done
     '';

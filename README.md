@@ -136,7 +136,6 @@ After flashing and booting your Raspberry Pi:
 Using Holesail:
 - Encrypted P2P tunnel
 - Credentials delivered as `remote.txt` and a QR image inside your Nextcloud
-- Public folder sharing via separate connection string
 
 > Want to access your files while traveling without exposing ports? Done.
 
@@ -165,13 +164,12 @@ time.timeZone = "Europe/Berlin";
 ## 🧱 Under the Hood
 
 - **NixOS** for immutability and reproducibility
-- **Nextcloud 32**
+- **Nextcloud 34**
 - **Holesail** for P2P remote access
 - Custom systemd services:
   - `startup.service`
   - `mymnt.service`
   - `p2pmagic.service`
-  - `p2public.service`
   - `rebooter.service`
 
 ```mermaid
@@ -179,7 +177,6 @@ graph TD
   A[nextcloud-setup] --> B[startup.service]
   B --> C[mymnt.service]
   B --> D[p2pmagic.service]
-  B --> E[p2public.service]
   B --> F[rebooter.service]
 ```
 
