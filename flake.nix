@@ -1,8 +1,8 @@
 {
   description = "A flake to produce sd-card images and nixos configurations running Nixtcloud for Raspberry Pi 4, 5, and NanoPi NEO3";
-  
-  #Nix-community cachix is needed if you want to build the image for raspberry pi 5. If you don't want to use it, 
-  #the linux kernel will be built from source which takes a long time.
+  #The Raspberry Pi kernel (linux-rpi) is not on cache.nixos.org, so Rpi4 and
+  #Rpi5 always compile it from source. The NanoPi NEO3 uses linuxManualConfig
+  #with a custom .config, which can never be cached either.
   nixConfig = {
       substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org" ];
 	    trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" 
@@ -12,11 +12,10 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     holesail.url = "github:jjacke13/holesail-nix";
-    raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
-  outputs = { self, nixpkgs, holesail, raspberry-pi-nix, nixos-hardware, ... }:
+  outputs = { self, nixpkgs, holesail, nixos-hardware, ... }:
   {
     nixosModules.state = { system.stateVersion = "25.11"; };
 
@@ -54,8 +53,8 @@
           holesail.nixosModules.aarch64-linux.holesail
           ./base/configuration.nix
           ./hardware/Rpi5.nix
-          raspberry-pi-nix.nixosModules.raspberry-pi
-          raspberry-pi-nix.nixosModules.sd-image 
+          nixos-hardware.nixosModules.raspberry-pi-5
+          "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
           self.nixosModules.state
           self.nixosModules.cppServer
         ];      
