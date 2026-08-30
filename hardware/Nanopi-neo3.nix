@@ -22,7 +22,10 @@ let
   ubootNanoPiNeo3 = pkgs.buildUBoot {
     defconfig = "nanopi-r2s-rk3328_defconfig";
     extraMeta.platforms = [ "aarch64-linux" ];
-    BL31 = "${pkgs.armTrustedFirmwareRK3328}/bl31.elf";
+    # env.BL31, not BL31: buildUBoot sets __structuredAttrs, so a bare
+    # top-level attr lands in .attrs.json and is never exported to make.
+    # binman then reports "missing external blobs ... atf-bl31" and fails.
+    env.BL31 = "${pkgs.armTrustedFirmwareRK3328}/bl31.elf";
     filesToInstall = [ "idbloader.img" "u-boot.itb" ];
   };
 
