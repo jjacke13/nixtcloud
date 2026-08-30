@@ -11,7 +11,7 @@
   
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    holesail.url = "github:jjacke13/holesail-nix/test";
+    holesail.url = "github:jjacke13/holesail-nix";
     raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
@@ -19,6 +19,16 @@
   outputs = { self, nixpkgs, holesail, raspberry-pi-nix, nixos-hardware, ... }:
   {
     nixosModules.state = { system.stateVersion = "25.11"; };
+
+    # Run the p2pmagic tunnel on the C++ Holesail server: same connection
+    # string, native backpressure, ~5x smaller closure than the Node build.
+    # Set here because base/configuration.nix has no access to flake inputs.
+    # The p2public filemanager stays on Node - holesail-cpp has no
+    # --filemanager mode.
+    nixosModules.cppServer = {
+      services.holesail-server.p2pmagic.package =
+        holesail.packages.aarch64-linux.holesail-cpp;
+    };
 
     packages.aarch64-linux = {
       Rpi4 = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
@@ -35,6 +45,7 @@
           nixos-hardware.nixosModules.raspberry-pi-4
           "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
           self.nixosModules.state
+          self.nixosModules.cppServer
         ];      
       };
 
@@ -46,6 +57,7 @@
           raspberry-pi-nix.nixosModules.raspberry-pi
           raspberry-pi-nix.nixosModules.sd-image 
           self.nixosModules.state
+          self.nixosModules.cppServer
         ];      
       };
 
@@ -56,6 +68,7 @@
           ./hardware/Nanopi-neo3.nix
           "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
           self.nixosModules.state
+          self.nixosModules.cppServer
         ];
       };
     };
