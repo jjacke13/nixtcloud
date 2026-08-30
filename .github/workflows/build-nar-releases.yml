@@ -57,40 +57,51 @@ jobs:
 
       - name: Build
         run: |
-          set -o pipefail
-          # 2>&1 > file  sends stderr down the pipe and stdout to the file, so
-          # progress stays live in the job log while build.err keeps a copy
-          if nix build \
+          # stdout carries the --json result the later steps parse, so it goes
+          # straight to the file with nothing else in that stream. stderr is
+          # teed so a failure leaves something to grep.
+          nix build \
             --accept-flake-config \
             --eval-store auto \
             --store ssh-ng://eu.nixbuild.net \
             --json \
-            ${{ matrix.attr }} 2>&1 > build-result.json | tee build.err
-          then
-            exit 0
-          else
-            # nixbuild.net reports the builder's exit code but not its output,
-            # so pull the log for every derivation the error names
-            grep -oE "/nix/store/[a-z0-9]{32}-[^']*\.drv" build.err | sort -u | while read -r drv; do
-              echo "::group::nix log $drv"
-              nix log --store ssh-ng://eu.nixbuild.net "$drv" || echo "(no log available on the builder)"
-              echo "::endgroup::"
+            ${{ matrix.attr }} > build-result.json 2> >(tee build.err >&2) || status=$?
+          if [ -n "${status:-}" ]; then
+            sleep 1
+            # nixbuild.net does not implement getBuildLogExact, so `nix log`
+            # against that store always fails. It does print its own build id,
+            # which is what the nixbuild.net dashboard indexes logs by.
+            for id in $(grep -oE 'build [0-9]+' build.err | awk '{print $2}' | sort -u); do
+              echo "::error::builder failed - full log is nixbuild.net build $id"
             done
-            exit 1
+            exit "$status"
           fi
+          echo "--- build-result.json ---"
+          cat build-result.json
+          echo
 
       - name: Export closure to NAR (toplevel)
         if: matrix.type == 'toplevel'
         run: |
-          TOPLEVEL=$(jq -r '.[0].outputs.out' build-result.json)
-          nix-store --store ssh-ng://eu.nixbuild.net --export $(nix-store --store ssh-ng://eu.nixbuild.net --query --requisites $TOPLEVEL) | gzip > ${{ matrix.name }}-toplevel.nar.gz
+          set -o pipefail
+          # jq -e fails the step on a null or missing out path. Without it an
+          # empty closure gzips to ~20 bytes and uploads as a plausible-looking
+          # asset that every device then fails to import.
+          TOPLEVEL=$(jq -er '.[0].outputs.out' build-result.json)
+          nix-store --store ssh-ng://eu.nixbuild.net --export $(nix-store --store ssh-ng://eu.nixbuild.net --query --requisites "$TOPLEVEL") | gzip > ${{ matrix.name }}-toplevel.nar.gz
+          size=$(stat -c %s ${{ matrix.name }}-toplevel.nar.gz)
+          [ "$size" -gt 1048576 ] || { echo "::error::NAR is only $size bytes"; exit 1; }
 
       - name: Copy and compress sdImage
         if: matrix.type == 'sdImage'
         run: |
-          OUTPUT=$(jq -r '.[0].outputs.out' build-result.json)
-          IMG_REL=$(nix store ls --store ssh-ng://eu.nixbuild.net --recursive $OUTPUT | grep '\.img$' | awk '{print $NF}' | head -1)
+          set -o pipefail
+          OUTPUT=$(jq -er '.[0].outputs.out' build-result.json)
+          IMG_REL=$(nix store ls --store ssh-ng://eu.nixbuild.net --recursive "$OUTPUT" | grep '\.img$' | awk '{print $NF}' | head -1)
+          [ -n "$IMG_REL" ] || { echo "::error::no .img found in $OUTPUT"; exit 1; }
           nix store cat --store ssh-ng://eu.nixbuild.net "$OUTPUT/$IMG_REL" | gzip > ${{ matrix.name }}.img.gz
+          size=$(stat -c %s ${{ matrix.name }}.img.gz)
+          [ "$size" -gt 1048576 ] || { echo "::error::image is only $size bytes"; exit 1; }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -104,8 +115,8 @@ jobs:
 
   release:
     needs: build
-    # needs: build would skip this job when any matrix leg fails; upload
-    # whatever assets did build
+    # needs: build alone would skip this job whenever any matrix leg fails;
+    # upload whatever assets did build
     if: always()
     runs-on: ubuntu-latest
     permissions:
@@ -126,7 +137,7 @@ jobs:
           shopt -s nullglob
           assets=(./nars/*/*.nar.gz ./nars/*/*.img.gz)
           if [ ${#assets[@]} -eq 0 ]; then
-            echo "No assets were produced by any matrix leg" >&2
+            echo "::error::no assets were produced by any matrix leg"
             exit 1
           fi
-          gh release upload ${{ github.event.release.tag_name }} "${assets[@]}"
+          gh release upload ${{ github.event.release.tag_name }} --clobber "${assets[@]}"
