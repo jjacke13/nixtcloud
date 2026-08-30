@@ -7,6 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      # One broken board must not cancel the assets for the other two
+      fail-fast: false
       matrix:
         include:
           - name: Rpi4
@@ -55,12 +57,27 @@ jobs:
 
       - name: Build
         run: |
-          nix build \
+          set -o pipefail
+          # 2>&1 > file  sends stderr down the pipe and stdout to the file, so
+          # progress stays live in the job log while build.err keeps a copy
+          if nix build \
             --accept-flake-config \
             --eval-store auto \
             --store ssh-ng://eu.nixbuild.net \
             --json \
-            ${{ matrix.attr }} > build-result.json
+            ${{ matrix.attr }} 2>&1 > build-result.json | tee build.err
+          then
+            exit 0
+          else
+            # nixbuild.net reports the builder's exit code but not its output,
+            # so pull the log for every derivation the error names
+            grep -oE "/nix/store/[a-z0-9]{32}-[^']*\.drv" build.err | sort -u | while read -r drv; do
+              echo "::group::nix log $drv"
+              nix log --store ssh-ng://eu.nixbuild.net "$drv" || echo "(no log available on the builder)"
+              echo "::endgroup::"
+            done
+            exit 1
+          fi
 
       - name: Export closure to NAR (toplevel)
         if: matrix.type == 'toplevel'
@@ -87,6 +104,9 @@ jobs:
 
   release:
     needs: build
+    # needs: build would skip this job when any matrix leg fails; upload
+    # whatever assets did build
+    if: always()
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -103,4 +123,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} ./nars/*/*.nar.gz ./nars/*/*.img.gz
+          shopt -s nullglob
+          assets=(./nars/*/*.nar.gz ./nars/*/*.img.gz)
+          if [ ${#assets[@]} -eq 0 ]; then
+            echo "No assets were produced by any matrix leg" >&2
+            exit 1
+          fi
+          gh release upload ${{ github.event.release.tag_name }} "${assets[@]}"
