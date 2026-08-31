@@ -1,2 +1,5 @@
 CLAUDE.md
 result
+result-*
+*.img.gz
+*.nar.gz
