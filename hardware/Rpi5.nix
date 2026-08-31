@@ -26,6 +26,13 @@
   # HATs are unstable with it, so it is left off.
   hardware.raspberry-pi.configtxt.settings.pi5.dtparam = [ "pciex1" ];
 
+  # sd-image-aarch64.nix imports profiles/base.nix, which turns on
+  # enableAllHardware. That feeds every name in hardware/all-hardware.nix to
+  # modprobe in the modules-shrunk step, and the RPi vendor kernel does not
+  # ship all of them - "dw-hdmi" is the first one it dies on. Rpi4 forces this
+  # off for the same reason.
+  hardware.enableAllHardware = lib.mkForce false;
+
   boot.kernelModules = [ "ntfs3" ];
 
   fileSystems."/" = {
