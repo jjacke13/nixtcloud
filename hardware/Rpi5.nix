@@ -33,6 +33,12 @@
   # off for the same reason.
   hardware.enableAllHardware = lib.mkForce false;
 
+  # Same problem from a second source: systemd/tpm2.nix adds tpm-crb and
+  # tpm-tis to the initrd, and the vendor kernel has neither. nixos-hardware
+  # turns this off in its Pi 4 profile ("# Allow building kernel") but not in
+  # the Pi 5 one.
+  boot.initrd.systemd.tpm2.enable = false;
+
   boot.kernelModules = [ "ntfs3" ];
 
   fileSystems."/" = {
