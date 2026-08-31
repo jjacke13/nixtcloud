@@ -47,11 +47,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1788074192,
-        "narHash": "sha256-U5T0IJGrmDwLcRYpcK0aOGKD3f3rgCA/w7bsdrZ289w=",
+        "lastModified": 1788198675,
+        "narHash": "sha256-y3+5iCfZOMGEfolM34BG+i+//iNtXtXu8A2l634JPp0=",
         "owner": "jjacke13",
         "repo": "holesail-nix",
-        "rev": "3eda6eafff45aef2c9d130c2ed899617231eee24",
+        "rev": "d7cba40edd47f31d3304925c847673b2d4dbaa26",
         "type": "github"
       },
       "original": {
@@ -66,11 +66,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1787659041,
-        "narHash": "sha256-xCpwY7gYCWma6Aa672osZiRO4kE6HqEjSdVKAA+5IEM=",
+        "lastModified": 1788198424,
+        "narHash": "sha256-5XtnmIYKMdWt7yXMnSWqwQWSJ9ESvKnutcPvQoCr/Ko=",
         "owner": "jjacke13",
         "repo": "holesail-cpp",
-        "rev": "8164207fd14f745786faf032e516b02c26769a52",
+        "rev": "9f8659b496287a45400f2987fabca5a4243be669",
         "type": "github"
       },
       "original": {
@@ -90,11 +90,11 @@
         "nixpkgs-esp-dev": "nixpkgs-esp-dev"
       },
       "locked": {
-        "lastModified": 1787387904,
-        "narHash": "sha256-1NXlQPWGdFJTdXvMIdgC01D3PJAtk2bKToeqRkP43/w=",
+        "lastModified": 1788197177,
+        "narHash": "sha256-anXY96M32PCH2NH0GPe6DZEbSzxTPCz4feIobSuxbtQ=",
         "owner": "jjacke13",
         "repo": "hyperdht-cpp",
-        "rev": "9580f99b5ce410448163a264e0207e3f825f83c8",
+        "rev": "d6fae6eaab571405b504fb9928ec95ce74e128b5",
         "type": "github"
       },
       "original": {
