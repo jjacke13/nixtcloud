@@ -19,14 +19,6 @@
   {
     nixosModules.state = { system.stateVersion = "25.11"; };
 
-    # Run the p2pmagic tunnel on the C++ Holesail server: same connection
-    # string, native backpressure, ~5x smaller closure than the Node build.
-    # Set here because base/configuration.nix has no access to flake inputs.
-    nixosModules.cppServer = {
-      services.holesail-server.p2pmagic.package =
-        holesail.packages.aarch64-linux.holesail-cpp;
-    };
-
     packages.aarch64-linux = {
       Rpi4 = self.nixosConfigurations.Rpi4.config.system.build.sdImage;
       Rpi5 = self.nixosConfigurations.Rpi5.config.system.build.sdImage;
@@ -42,7 +34,6 @@
           nixos-hardware.nixosModules.raspberry-pi-4
           "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
           self.nixosModules.state
-          self.nixosModules.cppServer
         ];      
       };
 
@@ -54,7 +45,6 @@
           nixos-hardware.nixosModules.raspberry-pi-5
           "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
           self.nixosModules.state
-          self.nixosModules.cppServer
         ];      
       };
 
@@ -65,7 +55,6 @@
           ./hardware/Nanopi-neo3.nix
           "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
           self.nixosModules.state
-          self.nixosModules.cppServer
         ];
       };
     };

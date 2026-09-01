@@ -177,6 +177,9 @@ in
   #### The following service enables Holesail to do its magic ####
   services.holesail-server.p2pmagic = {
   	enable = true;
+    # holesail-cpp instead of the Node build: same connection string and key
+    # derivation, native backpressure, ~55 MiB closure against ~276 MiB.
+    implementation = "cpp";
     host = "localhost";
   	port = 8080;
   	key-file = "/var/lib/nextcloud/data/admin/files/remote.txt";
