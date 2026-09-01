@@ -47,11 +47,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1788198675,
-        "narHash": "sha256-y3+5iCfZOMGEfolM34BG+i+//iNtXtXu8A2l634JPp0=",
+        "lastModified": 1788257745,
+        "narHash": "sha256-ReCfMyhG0J6Yipw8n2K95dQob3pBGxLgV5R4UVqCL0A=",
         "owner": "jjacke13",
         "repo": "holesail-nix",
-        "rev": "d7cba40edd47f31d3304925c847673b2d4dbaa26",
+        "rev": "6e265358e2039898ba03a08821e1b065862c77a4",
         "type": "github"
       },
       "original": {
@@ -66,11 +66,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1788198424,
-        "narHash": "sha256-5XtnmIYKMdWt7yXMnSWqwQWSJ9ESvKnutcPvQoCr/Ko=",
+        "lastModified": 1788256529,
+        "narHash": "sha256-Kox+e3GipzUIWia+TEhi5Ib1lh1ztg9XREN6ARdqbb8=",
         "owner": "jjacke13",
         "repo": "holesail-cpp",
-        "rev": "9f8659b496287a45400f2987fabca5a4243be669",
+        "rev": "75067ea04307df66239aa22a6ba30d91916e19ca",
         "type": "github"
       },
       "original": {
