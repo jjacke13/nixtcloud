@@ -11,8 +11,17 @@ in
   networking.hostName = name; 
   
   #### You can define your wireless network here if you don't want to use ethernet cable.
+  #### Keep the password out of the repo AND out of the nix store: put it in a
+  #### file on the device and refer to it with pskRaw = "ext:<name>". On the
+  #### device, before switching to a config that enables wireless:
+  ####
+  ####   printf 'psk_home=YOUR_PASSWORD\n' > /etc/nixos/wireless.secrets
+  ####   chmod 600 /etc/nixos/wireless.secrets
+  ####
+  #### A plain `psk = "..."` would be written world-readable into the store.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  #networking.wireless.networks = { SSID = { psk = "pass"; };  };
+  #networking.wireless.secretsFile = "/etc/nixos/wireless.secrets";
+  #networking.wireless.networks = { SSID = { pskRaw = "ext:psk_home"; };  };
 
   # Set your time zone.
   time.timeZone = "auto";
