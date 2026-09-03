@@ -10,18 +10,20 @@ in
 
   networking.hostName = name; 
   
-  #### You can define your wireless network here if you don't want to use ethernet cable.
-  #### Keep the password out of the repo AND out of the nix store: put it in a
-  #### file on the device and refer to it with pskRaw = "ext:<name>". On the
-  #### device, before switching to a config that enables wireless:
+  #### Wireless is enabled but declares no networks, so nothing identifying
+  #### lives in this repo. With no declarative network, wpa_supplicant runs
+  #### against /etc/wpa_supplicant/imperative.conf on the device, which the
+  #### service creates empty on first start. Empty file means nothing to
+  #### associate with, i.e. ethernet only.
   ####
-  ####   printf 'psk_home=YOUR_PASSWORD\n' > /etc/nixos/wireless.secrets
-  ####   chmod 600 /etc/nixos/wireless.secrets
+  #### To join a network, on the device:
   ####
-  #### A plain `psk = "..."` would be written world-readable into the store.
-  #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  #networking.wireless.secretsFile = "/etc/nixos/wireless.secrets";
-  #networking.wireless.networks = { SSID = { pskRaw = "ext:psk_home"; };  };
+  ####   wpa_passphrase YOUR_SSID YOUR_PASSWORD >> /etc/wpa_supplicant/imperative.conf
+  ####   systemctl restart wpa_supplicant
+  ####
+  #### The file is mode 664 root:wpa_supplicant and holds the hashed PSK. It
+  #### never enters the nix store and never enters this repo.
+  networking.wireless.enable = true;
 
   # Set your time zone.
   time.timeZone = "auto";
